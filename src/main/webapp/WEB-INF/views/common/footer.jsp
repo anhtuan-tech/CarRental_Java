@@ -15,23 +15,22 @@
             <div>
                 <h5 style="font-size:0.8rem; font-weight:700; color:#111827; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.06em;">Explore</h5>
                 <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem;">
-                    <li><a href="${pageContext.request.contextPath}/cars" style="color:#6B7280; font-size:0.875rem; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#6B7280'">Browse Fleet</a></li>
-                    <li><a href="${pageContext.request.contextPath}/register/owner" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#6B7280'">Become a Host</a></li>
-                    <li><a href="${pageContext.request.contextPath}/register/customer" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#6B7280'">Sign Up</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cars" style="color:#6B7280; font-size:0.875rem; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Browse Fleet</a></li>
+                    <li><a href="${pageContext.request.contextPath}/register/owner" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Become a Host</a></li>
+                    <li><a href="${pageContext.request.contextPath}/register/customer" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Sign Up</a></li>
                 </ul>
             </div>
             <div>
                 <h5 style="font-size:0.8rem; font-weight:700; color:#111827; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.06em;">Support</h5>
                 <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem;">
-                    <li><a href="${pageContext.request.contextPath}/profile" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#6B7280'">Account Center</a></li>
+                    <li><a href="${pageContext.request.contextPath}/profile" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Account Center</a></li>
                     <li><a href="#" style="color:#6B7280; font-size:0.875rem; text-decoration:none;">Terms &amp; Services</a></li>
                     <li><a href="#" style="color:#6B7280; font-size:0.875rem; text-decoration:none;">Privacy Policy</a></li>
                 </ul>
             </div>
         </div>
         <div style="border-top:1px solid #E5E7EB; padding-top:1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#9CA3AF;">
-            <span>&copy; 2026 CarRental Platform. All rights reserved.</span>
-            <span>Made with <i class="bi bi-heart-fill" style="color:var(--color-red);"></i> in Vietnam</span>
+            <span>&copy; 2026 Car Rental Platform. All rights reserved.</span>
         </div>
     </div>
 </footer>
@@ -49,17 +48,21 @@
 %>
 <script src="${pageContext.request.contextPath}/js/toast.js"></script>
 <script>
-    (function () {
-        var el = document.getElementById('toast-data');
-        if (el) {
-            var err      = el.getAttribute('data-error');
-            var succ     = el.getAttribute('data-success');
-            var sessSucc = el.getAttribute('data-session-success');
-            var sessErr  = el.getAttribute('data-session-error');
-            if (err      && err.trim() !== '')      showToast(err,      'error');
-            if (succ     && succ.trim() !== '')     showToast(succ,     'success');
-            if (sessSucc && sessSucc.trim() !== '') showToast(sessSucc, 'success');
-            if (sessErr  && sessErr.trim() !== '')  showToast(sessErr,  'error');
-        }
-    })();
+                        (function () {
+                            var el = document.getElementById('toast-data');
+                            if (el) {
+                                var err = el.getAttribute('data-error');
+                                var succ = el.getAttribute('data-success');
+                                var sessSucc = el.getAttribute('data-session-success');
+                                var sessErr = el.getAttribute('data-session-error');
+                                if (err && err.trim() !== '')
+                                    showToast(err, 'error');
+                                if (succ && succ.trim() !== '')
+                                    showToast(succ, 'success');
+                                if (sessSucc && sessSucc.trim() !== '')
+                                    showToast(sessSucc, 'success');
+                                if (sessErr && sessErr.trim() !== '')
+                                    showToast(sessErr, 'error');
+                            }
+                        })();
 </script>
