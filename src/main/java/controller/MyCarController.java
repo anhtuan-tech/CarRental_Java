@@ -84,8 +84,62 @@ public class MyCarController extends HttpServlet {
             processUpdateCar(request, response, user);
         } else if ("delete".equalsIgnoreCase(action)) {
             processDeleteCar(request, response, user);
+        } else if ("uploadImage".equalsIgnoreCase(action)) {
+            processUploadImage(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
+        }
+    }
+
+    private void processUploadImage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String base64Data = request.getParameter("base64Image");
+        if (base64Data == null || base64Data.isEmpty()) {
+            response.getWriter().write("{\"success\":false,\"message\":\"No image data provided\"}");
+            return;
+        }
+
+        try {
+            String[] parts = base64Data.split(",");
+            String imageString = parts.length > 1 ? parts[1] : parts[0];
+            byte[] imageBytes = java.util.Base64.getDecoder().decode(imageString);
+
+            // Create uploads directory in Tomcat deployment
+            String uploadPath = request.getServletContext().getRealPath("") + java.io.File.separator + "uploads" + java.io.File.separator + "cars";
+            java.io.File uploadDir = new java.io.File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            // Generate unique filename
+            String fileName = "car_" + java.util.UUID.randomUUID().toString() + ".jpg";
+            java.io.File file = new java.io.File(uploadDir, fileName);
+
+            // Write to deployment directory
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                fos.write(imageBytes);
+            }
+
+            // Write to project source directory so it persists across rebuilds
+            String sourcePath = "d:/SU26 07/SWD392/CarRental/src/main/webapp/uploads/cars";
+            java.io.File sourceDir = new java.io.File(sourcePath);
+            if (!sourceDir.exists()) {
+                sourceDir.mkdirs();
+            }
+            java.io.File sourceFile = new java.io.File(sourceDir, fileName);
+            try (java.io.FileOutputStream fosSource = new java.io.FileOutputStream(sourceFile)) {
+                fosSource.write(imageBytes);
+            }
+
+            String relativeUrl = request.getContextPath() + "/uploads/cars/" + fileName;
+            response.getWriter().write("{\"success\":true,\"imageUrl\":\"" + relativeUrl + "\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace(); // In ra console để gỡ lỗi!
+            response.getWriter().write("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
         }
     }
 
@@ -155,6 +209,7 @@ public class MyCarController extends HttpServlet {
         String typeIdStr = request.getParameter("typeId");
         String documentUrl = request.getParameter("documentUrl");
         String specsJson = request.getParameter("specsJson");
+        String primaryImageUrl = request.getParameter("primaryImageUrl");
 
         // Simple validation
         BigDecimal price = BigDecimal.ZERO;
@@ -169,7 +224,7 @@ public class MyCarController extends HttpServlet {
         if (valError != null) {
             request.setAttribute("errorMsg", valError);
             prefillRegisterForm(request, carName, brand, model, licensePlate, priceStr, typeIdStr, documentUrl,
-                    specsJson);
+                    specsJson, primaryImageUrl);
             showRegisterForm(request, response);
             return;
         }
@@ -179,7 +234,7 @@ public class MyCarController extends HttpServlet {
         if (carDAO.checkDuplicateLicense(licensePlate)) {
             request.setAttribute("errorMsg", "License plate is already registered to another active vehicle.");
             prefillRegisterForm(request, carName, brand, model, licensePlate, priceStr, typeIdStr, documentUrl,
-                    specsJson);
+                    specsJson, primaryImageUrl);
             showRegisterForm(request, response);
             return;
         }
@@ -192,7 +247,8 @@ public class MyCarController extends HttpServlet {
         car.setModel(model.trim());
         car.setLicensePlate(licensePlate.trim().toUpperCase());
         car.setPricePerDay(price);
-        car.setDocumentUrl(documentUrl.trim());
+        car.setDocumentUrl(documentUrl != null ? documentUrl.trim() : "");
+        car.setPrimaryImageUrl(primaryImageUrl != null ? primaryImageUrl.trim() : "");
         car.setSpecsJson(specsJson != null ? specsJson.trim() : "");
 
         boolean success = carDAO.insertCar(car);
@@ -203,7 +259,7 @@ public class MyCarController extends HttpServlet {
         } else {
             request.setAttribute("errorMsg", "Failed to register car. Try again.");
             prefillRegisterForm(request, carName, brand, model, licensePlate, priceStr, typeIdStr, documentUrl,
-                    specsJson);
+                    specsJson, primaryImageUrl);
             showRegisterForm(request, response);
         }
     }
@@ -257,6 +313,20 @@ public class MyCarController extends HttpServlet {
         String typeIdStr = request.getParameter("typeId");
         String documentUrl = request.getParameter("documentUrl");
         String specsJson = request.getParameter("specsJson");
+        String primaryImageUrl = request.getParameter("primaryImageUrl");
+
+        System.out.println("=== processUpdateCar DEBUG ===");
+        System.out.println("carIdStr: " + carIdStr);
+        System.out.println("carName: " + carName);
+        System.out.println("brand: " + brand);
+        System.out.println("model: " + model);
+        System.out.println("licensePlate: " + licensePlate);
+        System.out.println("priceStr: " + priceStr);
+        System.out.println("typeIdStr: " + typeIdStr);
+        System.out.println("documentUrl: " + documentUrl);
+        System.out.println("specsJson: " + specsJson);
+        System.out.println("primaryImageUrl: " + primaryImageUrl);
+        System.out.println("==============================");
 
         int carId = Integer.parseInt(carIdStr);
         int typeId = Integer.parseInt(typeIdStr);
@@ -285,7 +355,7 @@ public class MyCarController extends HttpServlet {
 
         // If the license plate changes, check unique constraints (but check if status
         // is approved first)
-        if (!"Approved".equalsIgnoreCase(existing.getStatus())
+        if (!"Available".equalsIgnoreCase(existing.getStatus())
                 && !existing.getLicensePlate().equalsIgnoreCase(licensePlate.trim())) {
             if (carDAO.checkDuplicateLicense(licensePlate)) {
                 request.getSession(true).setAttribute("toastErrorMsg", "Duplicate license plate error.");
@@ -304,7 +374,8 @@ public class MyCarController extends HttpServlet {
         // inside CarDAO.updateCar)
         car.setLicensePlate(licensePlate.trim().toUpperCase());
         car.setPricePerDay(price);
-        car.setDocumentUrl(documentUrl.trim());
+        car.setDocumentUrl(documentUrl != null ? documentUrl.trim() : "");
+        car.setPrimaryImageUrl(primaryImageUrl != null ? primaryImageUrl.trim() : "");
         car.setSpecsJson(specsJson != null ? specsJson.trim() : "");
 
         boolean success = carDAO.updateCar(car);
@@ -312,7 +383,11 @@ public class MyCarController extends HttpServlet {
         if (success) {
             request.getSession(true).setAttribute("toastSuccessMsg", "Update Successful.");
         } else {
-            request.getSession(true).setAttribute("toastErrorMsg", "Update failed.");
+            String errorMsg = "Update failed.";
+            if (CarDAO.getLastError() != null) {
+                errorMsg += " DB Error: " + CarDAO.getLastError();
+            }
+            request.getSession(true).setAttribute("toastErrorMsg", errorMsg);
         }
         response.sendRedirect(request.getContextPath() + "/owner/cars?action=detail&id=" + carId);
     }
@@ -365,10 +440,7 @@ public class MyCarController extends HttpServlet {
                 licensePlate == null || licensePlate.trim().isEmpty()) {
             return "Name, Brand, Model, and License Plate are mandatory.";
         }
-        // BR40 – document url
-        if (documentUrl == null || documentUrl.trim().isEmpty()) {
-            return "Registration Document URL is mandatory (BR40).";
-        }
+        // BR40 – document url (no longer mandatory as per user request)
         // BR44 – price range
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
             return "Price per day must be strictly greater than zero (BR44).";
@@ -377,7 +449,7 @@ public class MyCarController extends HttpServlet {
     }
 
     private void prefillRegisterForm(HttpServletRequest request, String carName, String brand, String model,
-            String licensePlate, String priceStr, String typeIdStr, String documentUrl, String specsJson) {
+            String licensePlate, String priceStr, String typeIdStr, String documentUrl, String specsJson, String primaryImageUrl) {
         request.setAttribute("carNameVal", carName);
         request.setAttribute("brandVal", brand);
         request.setAttribute("modelVal", model);
@@ -386,5 +458,6 @@ public class MyCarController extends HttpServlet {
         request.setAttribute("typeIdVal", typeIdStr);
         request.setAttribute("documentUrlVal", documentUrl);
         request.setAttribute("specsJsonVal", specsJson);
+        request.setAttribute("primaryImageUrlVal", primaryImageUrl);
     }
 }

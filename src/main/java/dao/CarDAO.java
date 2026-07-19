@@ -19,6 +19,11 @@ import java.util.logging.Logger;
 public class CarDAO {
 
     private static final Logger logger = Logger.getLogger(CarDAO.class.getName());
+    private static String lastError = null;
+    
+    public static String getLastError() {
+        return lastError;
+    }
 
     /**
      * Retrieve all available cars (non-paginated).
@@ -373,19 +378,54 @@ public class CarDAO {
     public boolean insertCar(Car car) {
         DBContext db = new DBContext();
         String query = "INSERT INTO Car (owner_id, type_id, car_name, brand, model, license_plate, specs_json, price_per_day, status, document_url) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending_Approval', ?)";
-        int affected = db.executeQuery(query, new Object[]{
-                car.getOwnerId(),
-                car.getTypeId(),
-                car.getCarName(),
-                car.getBrand(),
-                car.getModel(),
-                car.getLicensePlate(),
-                car.getSpecsJson(),
-                car.getPricePerDay(),
-                car.getDocumentUrl()
-        });
-        return affected > 0;
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending_Approval', ?); SELECT SCOPE_IDENTITY() AS new_id;";
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement st = null;
+        java.sql.ResultSet rs = null;
+        try {
+            conn = db.getConnection();
+            st = conn.prepareStatement(query);
+            st.setInt(1, car.getOwnerId());
+            st.setInt(2, car.getTypeId());
+            st.setString(3, car.getCarName());
+            st.setString(4, car.getBrand());
+            st.setString(5, car.getModel());
+            st.setString(6, car.getLicensePlate());
+            st.setString(7, car.getSpecsJson());
+            st.setBigDecimal(8, car.getPricePerDay());
+            st.setString(9, car.getDocumentUrl());
+            
+            boolean hasResults = st.execute();
+            while (!hasResults && st.getUpdateCount() != -1) {
+                hasResults = st.getMoreResults();
+            }
+            
+            if (hasResults) {
+                rs = st.getResultSet();
+                if (rs != null && rs.next()) {
+                    int carId = rs.getInt("new_id");
+                    car.setCarId(carId);
+                    
+                    if (car.getPrimaryImageUrl() != null && !car.getPrimaryImageUrl().trim().isEmpty()) {
+                        String imgQuery = "INSERT INTO CarImage (car_id, image_url, is_primary) VALUES (?, ?, 1)";
+                        try (java.sql.PreparedStatement stImg = conn.prepareStatement(imgQuery)) {
+                            stImg.setInt(1, carId);
+                            stImg.setString(2, car.getPrimaryImageUrl());
+                            stImg.executeUpdate();
+                        }
+                    }
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
+            lastError = ex.getMessage();
+            logger.log(Level.SEVERE, "insertCar failed", ex);
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) {}
+            if (st != null) try { st.close(); } catch (SQLException e) {}
+            if (conn != null) try { conn.close(); } catch (SQLException e) {}
+        }
+        return false;
     }
 
     /**
@@ -456,39 +496,64 @@ public class CarDAO {
         if (existing == null) return false;
 
         DBContext db = new DBContext();
-        String query;
-        Object[] params;
+        String query = "UPDATE Car SET type_id = ?, car_name = ?, brand = ?, model = ?, specs_json = ?, price_per_day = ?, document_url = ? "
+                + "WHERE car_id = ?";
 
-        if ("Approved".equalsIgnoreCase(existing.getStatus())) {
-            query = "UPDATE Car SET type_id = ?, car_name = ?, brand = ?, model = ?, specs_json = ?, price_per_day = ?, document_url = ? "
-                    + "WHERE car_id = ?";
-            params = new Object[]{
-                    car.getTypeId(),
-                    car.getCarName(),
-                    car.getBrand(),
-                    car.getModel(),
-                    car.getSpecsJson(),
-                    car.getPricePerDay(),
-                    car.getDocumentUrl(),
-                    car.getCarId()
-            };
-        } else {
-            query = "UPDATE Car SET type_id = ?, car_name = ?, brand = ?, model = ?, license_plate = ?, specs_json = ?, price_per_day = ?, document_url = ? "
-                    + "WHERE car_id = ?";
-            params = new Object[]{
-                    car.getTypeId(),
-                    car.getCarName(),
-                    car.getBrand(),
-                    car.getModel(),
-                    car.getLicensePlate(),
-                    car.getSpecsJson(),
-                    car.getPricePerDay(),
-                    car.getDocumentUrl(),
-                    car.getCarId()
-            };
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement st = null;
+        try {
+            conn = db.getConnection();
+            st = conn.prepareStatement(query);
+            st.setInt(1, car.getTypeId());
+            st.setString(2, car.getCarName());
+            st.setString(3, car.getBrand());
+            st.setString(4, car.getModel());
+            st.setString(5, car.getSpecsJson());
+            st.setBigDecimal(6, car.getPricePerDay());
+            st.setString(7, car.getDocumentUrl());
+            st.setInt(8, car.getCarId());
+            
+            int affected = st.executeUpdate();
+            if (affected > 0) {
+                if (car.getPrimaryImageUrl() != null && !car.getPrimaryImageUrl().trim().isEmpty()) {
+                    String checkQuery = "SELECT COUNT(*) AS cnt FROM CarImage WHERE car_id = ? AND is_primary = 1";
+                    boolean hasPrimary = false;
+                    try (java.sql.PreparedStatement checkSt = conn.prepareStatement(checkQuery)) {
+                        checkSt.setInt(1, car.getCarId());
+                        try (java.sql.ResultSet rs = checkSt.executeQuery()) {
+                            if (rs != null && rs.next()) {
+                                hasPrimary = rs.getInt("cnt") > 0;
+                            }
+                        }
+                    }
+                    
+                    if (hasPrimary) {
+                        String updateImg = "UPDATE CarImage SET image_url = ? WHERE car_id = ? AND is_primary = 1";
+                        try (java.sql.PreparedStatement upSt = conn.prepareStatement(updateImg)) {
+                            upSt.setString(1, car.getPrimaryImageUrl());
+                            upSt.setInt(2, car.getCarId());
+                            upSt.executeUpdate();
+                        }
+                    } else {
+                        String insertImg = "INSERT INTO CarImage (car_id, image_url, is_primary) VALUES (?, ?, 1)";
+                        try (java.sql.PreparedStatement inSt = conn.prepareStatement(insertImg)) {
+                            inSt.setInt(1, car.getCarId());
+                            inSt.setString(2, car.getPrimaryImageUrl());
+                            inSt.executeUpdate();
+                        }
+                    }
+                }
+                return true;
+            }
+        } catch (SQLException ex) {
+            lastError = ex.getMessage();
+            ex.printStackTrace();
+            logger.log(Level.SEVERE, "updateCar failed", ex);
+        } finally {
+            if (st != null) try { st.close(); } catch (SQLException e) {}
+            if (conn != null) try { conn.close(); } catch (SQLException e) {}
         }
-        int affected = db.executeQuery(query, params);
-        return affected > 0;
+        return false;
     }
 
     /**

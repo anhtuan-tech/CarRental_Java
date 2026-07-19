@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Controller servlet for Owner Earnings Analytics (UC-17).
  */
-@WebServlet(name = "EarningController", urlPatterns = {"/owner/earnings"})
+@WebServlet(name = "EarningController", urlPatterns = {"/owner/earnings", "/owner/earning"})
 public class EarningController extends HttpServlet {
 
     @Override

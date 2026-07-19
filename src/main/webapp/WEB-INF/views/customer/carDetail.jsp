@@ -220,8 +220,8 @@
                                 <c:out value="${car.status}"/>
                             </span>
                         </td>
-                    </tr>
                 </table>
+                <script type="application/json" id="specsData">${car.specsJson}</script>
             </div>
 
             <!-- Right Panel: Sticky Booking card -->
@@ -368,6 +368,34 @@
     </div>
 </footer>
 
+<script>
+    (function() {
+        var scriptEl = document.getElementById('specsData');
+        var table = document.querySelector('.spec-table');
+        if (!scriptEl || !table) return;
+        var friendlyLabels = {
+            'Transmission': 'Transmission',
+            'Fuel': 'Fuel Type',
+            'Seats': 'Seats',
+            'Consumption': 'Fuel Consumption'
+        };
+        try {
+            var specs = JSON.parse(scriptEl.textContent || scriptEl.innerHTML);
+            Object.keys(specs).forEach(function(key) {
+                if (specs[key]) {
+                    var row = document.createElement('tr');
+                    var label = friendlyLabels[key] || key;
+                    var val = specs[key];
+                    row.innerHTML = '<td class="label">' + label + '</td>' +
+                                    '<td>' + val + '</td>';
+                    table.appendChild(row);
+                }
+            });
+        } catch(e) {
+            console.log("No extra specs parsed", e);
+        }
+    })();
+</script>
 <jsp:include page="/WEB-INF/views/common/footer.jsp" />
 </body>
 </html>

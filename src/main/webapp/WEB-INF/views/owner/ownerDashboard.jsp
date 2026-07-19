@@ -33,11 +33,6 @@
                     <i class="bi bi-car-front-fill"></i> My Vehicles
                 </a>
             </li>
-            <li class="mgmt-menu-item">
-                <a href="${pageContext.request.contextPath}/owner/cars?action=register">
-                    <i class="bi bi-plus-circle-fill"></i> Register New Car
-                </a>
-            </li>
 
             <div class="mgmt-menu-section-title">Business</div>
             <li class="mgmt-menu-item">
