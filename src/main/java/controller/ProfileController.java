@@ -143,7 +143,26 @@ public class ProfileController extends HttpServlet {
                     uploadDir.mkdirs();
                 }
 
-                filePart.write(uploadPath + File.separator + uniqueName);
+                String targetFilePath = uploadPath + File.separator + uniqueName;
+                filePart.write(targetFilePath);
+
+                try {
+                    String baseRealPath = request.getServletContext().getRealPath("");
+                    if (baseRealPath != null && baseRealPath.contains("target")) {
+                        String sourcePath = baseRealPath.split("target")[0] + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "uploads" + File.separator + "avatars";
+                        File sourceDir = new File(sourcePath);
+                        if (!sourceDir.exists()) {
+                            sourceDir.mkdirs();
+                        }
+                        java.nio.file.Files.copy(
+                            java.nio.file.Paths.get(targetFilePath),
+                            java.nio.file.Paths.get(sourcePath + File.separator + uniqueName),
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                        );
+                    }
+                } catch (Exception ignored) {
+                }
+
                 avatarUrl = request.getContextPath() + "/uploads/avatars/" + uniqueName;
             }
         } catch (IllegalArgumentException ex) {

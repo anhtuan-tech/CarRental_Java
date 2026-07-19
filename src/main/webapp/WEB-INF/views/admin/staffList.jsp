@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-        <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+    <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+    <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
             <!DOCTYPE html>
             <html lang="en">
 
@@ -11,8 +12,9 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
                 <style>
                     .admin-container {
-                        max-width: 1000px;
-                        margin: var(--space-8) auto;
+                        max-width: 100%;
+                        margin: 0 auto;
+                        padding: 0 var(--space-4);
                     }
 
                     .action-bar {
@@ -35,11 +37,8 @@
                         background: var(--color-dark-card);
                         border: 1px solid var(--color-dark-border);
                         border-radius: var(--radius-xl);
-                        padding: var(--space-6);
+                        padding: var(--space-4) var(--space-6);
                         margin-bottom: var(--space-4);
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
                         transition: var(--transition-fast);
                     }
 
@@ -47,20 +46,44 @@
                         border-color: var(--color-blue-border);
                     }
 
-                    .staff-details {
-                        display: flex;
-                        flex-direction: column;
-                        gap: var(--space-1);
+                    .staff-grid {
+                        display: grid;
+                        grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr;
+                        align-items: center;
+                        gap: var(--space-4);
+                        width: 100%;
                     }
 
-                    .staff-name {
-                        font-size: 1.2rem;
-                        font-weight: 700;
+                    .grid-col {
+                        font-size: 0.95rem;
                         color: var(--color-white);
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                     }
 
-                    .staff-meta {
-                        font-size: 0.85rem;
+                    .col-no {
+                        font-weight: 700;
+                        color: var(--orange);
+                        font-size: 1.1rem;
+                    }
+
+                    .col-avatar {
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-start;
+                    }
+
+                    .col-name {
+                        font-weight: 700;
+                        font-size: 1.1rem;
+                    }
+
+                    .col-email {
+                        color: var(--color-gray-light);
+                    }
+
+                    .col-phone {
                         color: var(--color-gray-light);
                     }
 
@@ -130,67 +153,113 @@
                             </div>
                             <div class="blue-line" style="margin-bottom: 2rem;"></div>
 
-                            <!-- Action bar & searches -->
-                            <div class="action-bar">
-                                <form action="${pageContext.request.contextPath}/admin/staff" method="get"
-                                    class="search-form">
-                                    <input type="hidden" name="action" value="search" />
-                                    <input type="text" name="keyword" class="form-control"
-                                        placeholder="Search by name, email, phone..."
-                                        value="<c:out value='${requestScope.keywordVal}'/>" required />
-                                    <button type="submit" class="btn btn-blue btn-sm"
-                                        style="padding:0 var(--space-4); height:42px;">Search</button>
-                                    <c:if test="${not empty keywordVal}">
-                                        <a href="${pageContext.request.contextPath}/admin/staff?action=list"
-                                            class="btn btn-ghost btn-sm"
-                                            style="height:42px; display:flex; align-items:center;">Reset</a>
-                                    </c:if>
-                                </form>
+                             <!-- Action bar & searches -->
+                             <div class="action-bar" style="display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin-bottom:1.5rem;">
+                                 <div style="flex-grow:1; max-width:400px; position:relative;">
+                                     <input type="text" id="staffSearchInput" class="form-control"
+                                            placeholder="Search staff instantly..."
+                                            style="padding-left: 2.5rem; height: 42px;" />
+                                     <i class="bi bi-search" style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+                                 </div>
+                                 <a href="${pageContext.request.contextPath}/admin/staff?action=create"
+                                     class="btn btn-blue btn-sm"
+                                     style="height:42px; display:inline-flex; align-items:center;"><i class="bi bi-person-plus-fill" style="margin-right:0.5rem;"></i> Add New Staff</a>
+                             </div>
 
-                                <a href="${pageContext.request.contextPath}/admin/staff?action=create"
-                                    class="btn btn-blue btn-sm"
-                                    style="height:42px; display:inline-flex; align-items:center;">+ Add New Staff</a>
-                            </div>
+                             <!-- Staff indexes list -->
+                             <div id="staffListContainer">
+                              <c:choose>
+                                  <c:when test="${not empty staffList}">
+                                      <div class="staff-grid-header" style="display: grid; grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr; padding: var(--space-3) var(--space-6); font-weight: 700; color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--color-dark-border); margin-bottom: var(--space-4);">
+                                          <div>No.</div>
+                                          <div>Avatar</div>
+                                          <div>Full Name</div>
+                                          <div>Email Address</div>
+                                          <div>Phone Number</div>
+                                          <div style="text-align: right; padding-right: var(--space-4);">Status</div>
+                                      </div>
+                                      <c:forEach var="staff" items="${staffList}" varStatus="loop">
+                                          <div class="staff-row-card"
+                                               data-name="<c:out value='${staff.fullName}'/>"
+                                               data-email="<c:out value='${staff.email}'/>"
+                                               data-phone="<c:out value='${staff.phoneNumber}'/>"
+                                               onclick="window.location.href='${pageContext.request.contextPath}/admin/staff?action=detail&id=${staff.userId}'"
+                                               style="cursor: pointer;">
+                                              <div class="staff-grid">
+                                                  <!-- Sequential No. -->
+                                                  <div class="grid-col col-no">#${loop.index + 1}</div>
+                                                  
+                                                  <!-- Round Avatar -->
+                                                  <div class="grid-col col-avatar">
+                                                      <c:choose>
+                                                          <c:when test="${not empty staff.avatarUrl}">
+                                                              <img src="${staff.avatarUrl}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--orange-border);" alt="Avatar" />
+                                                          </c:when>
+                                                          <c:otherwise>
+                                                              <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--orange-pale); border: 2px solid var(--orange-border); display: flex; align-items: center; justify-content: center; color: var(--orange-dark); font-weight: 700; font-size: 1rem;">
+                                                                  <c:out value="${fn:substring(staff.fullName, 0, 1)}"/>
+                                                              </div>
+                                                          </c:otherwise>
+                                                      </c:choose>
+                                                  </div>
+                                                  
+                                                  <!-- Staff Info -->
+                                                  <div class="grid-col col-name"><c:out value="${staff.fullName}" /></div>
+                                                  <div class="grid-col col-email"><c:out value="${staff.email}" /></div>
+                                                  <div class="grid-col col-phone"><c:out value="${staff.phoneNumber}" /></div>
+                                                  
+                                                  <!-- Status Badge only (No button) -->
+                                                  <div style="text-align: right;">
+                                                      <span class="status-badge ${staff.status == 'Active' ? 'active' : (staff.status == 'Suspended' ? 'suspended' : 'blocked')}">
+                                                          <c:out value="${staff.status}" />
+                                                      </span>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </c:forEach>
+                                 </c:when>
+                                 <c:otherwise>
+                                     <!-- Empty list state message -->
+                                      <div class="empty-state">
+                                          <div class="empty-state-icon"><i class="bi bi-people-fill"></i></div>
+                                          <div class="empty-state-title">No staff accounts available</div>
+                                         <p class="text-muted text-sm" style="margin-top:0.5rem;">There are no back-office personnel registered.</p>
+                                     </div>
+                                 </c:otherwise>
+                             </c:choose>
+                             </div>
 
-                            <!-- Staff indexes list () -->
-                            <c:choose>
-                                <c:when test="${not empty staffList}">
-                                    <c:forEach var="staff" items="${staffList}">
-                                        <div class="staff-row-card">
-                                            <div class="staff-details">
-                                                <div class="staff-name">
-                                                    <c:out value="${staff.fullName}" />
-                                                </div>
-                                                <div class="staff-meta">Email: <strong>
-                                                        <c:out value="${staff.email}" />
-                                                    </strong></div>
-                                                <div class="staff-meta">Phone:
-                                                    <c:out value="${staff.phoneNumber}" />
-                                                </div>
-                                            </div>
+                             <div id="noStaffSearchPlaceholder" class="empty-state" style="display:none; padding: 2rem; border: 1px dashed var(--border); border-radius: var(--r-xl); background: var(--white);">
+                                 <div class="empty-state-icon" style="color:var(--text-muted);"><i class="bi bi-search"></i></div>
+                                 <div class="empty-state-title" style="margin-top:0.5rem; font-weight:600;">No matching staff members</div>
+                                 <p class="text-muted text-sm" style="margin-top:0.25rem;">Try searching using different keywords.</p>
+                             </div>
 
-                                            <div
-                                                style="text-align:right; display:flex; flex-direction:column; gap:var(--space-2); align-items:flex-end;">
-                                                <div
-                                                    class="status-badge ${staff.status == 'Active' ? 'active' : (staff.status == 'Suspended' ? 'suspended' : 'blocked')}">
-                                                    <c:out value="${staff.status}" />
-                                                </div>
-                                                <a href="${pageContext.request.contextPath}/admin/staff?action=detail&id=${staff.userId}"
-                                                    class="btn btn-outline-blue btn-sm">Manage Profile</a>
-                                            </div>
-                                        </div>
-                                    </c:forEach>
-                                </c:when>
-                                <c:otherwise>
-                                    <!-- Empty list state message -->
-                                     <div class="empty-state">
-                                         <div class="empty-state-icon"><i class="bi bi-people-fill"></i></div>
-                                         <div class="empty-state-title">No staff accounts available</div>
-                                        <p class="text-muted text-sm" style="margin-top:0.5rem;">There are no
-                                            back-office personnel registered under this node.</p>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
+                             <script>
+                                 document.getElementById('staffSearchInput').addEventListener('input', function() {
+                                     var val = this.value.toLowerCase().trim();
+                                     var cards = document.querySelectorAll('.staff-row-card');
+                                     var foundCount = 0;
+                                     cards.forEach(function(card) {
+                                         var name = card.getAttribute('data-name').toLowerCase();
+                                         var email = card.getAttribute('data-email').toLowerCase();
+                                         var phone = card.getAttribute('data-phone').toLowerCase();
+                                         if (name.includes(val) || email.includes(val) || phone.includes(val)) {
+                                             card.style.setProperty('display', 'flex', 'important');
+                                             foundCount++;
+                                         } else {
+                                             card.style.setProperty('display', 'none', 'important');
+                                         }
+                                     });
+
+                                     var placeholder = document.getElementById('noStaffSearchPlaceholder');
+                                     if (foundCount === 0 && val !== "") {
+                                         placeholder.style.display = 'block';
+                                     } else {
+                                         placeholder.style.display = 'none';
+                                     }
+                                 });
+                             </script>
 
                         </div>
                     </main>

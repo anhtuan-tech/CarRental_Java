@@ -144,20 +144,7 @@
 
             <jsp:include page="/WEB-INF/views/common/footer.jsp" />
                     <script>
-                        (function () {
-                            var el = document.getElementById('toast-data');
-                            if (el) {
-                                var err = el.getAttribute('data-error');
-                                var succ = el.getAttribute('data-success');
-                                var sessSucc = el.getAttribute('data-session-success');
-                                var sessErr = el.getAttribute('data-session-error');
-
-                                if (err && err.trim() !== '') showToast(err, 'error');
-                                if (succ && succ.trim() !== '') showToast(succ, 'success');
-                                if (sessSucc && sessSucc.trim() !== '') showToast(sessSucc, 'success');
-                                if (sessErr && sessErr.trim() !== '') showToast(sessErr, 'error');
-                            }
-                        })();
+                        
 
                 document.getElementById('ownerRegisterForm').addEventListener('submit', function (e) {
                     var email = document.getElementById('email').value.trim();

@@ -18,6 +18,10 @@ import java.util.List;
  * (UC-20.1 to UC-20.6).
  */
 @WebServlet(name = "AdminController", urlPatterns = { "/admin/staff", "/admin/users" })
+@jakarta.servlet.annotation.MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 5, // 5MB
+        maxRequestSize = 1024 * 1024 * 10 // 10MB
+)
 public class AdminController extends HttpServlet {
 
     @Override
@@ -77,7 +81,7 @@ public class AdminController extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        if (user.getRoleId() != 4) {
+        if (user.getRoleId() != 1) { // Admin role is 1
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             return;
         }
@@ -154,10 +158,12 @@ public class AdminController extends HttpServlet {
         String email = request.getParameter("email");
         String phone = request.getParameter("phoneNumber");
         String fullName = request.getParameter("fullName");
+        String password = request.getParameter("password");
 
         if (email == null || email.trim().isEmpty() ||
                 phone == null || phone.trim().isEmpty() ||
-                fullName == null || fullName.trim().isEmpty()) {
+                fullName == null || fullName.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
             request.setAttribute("errorMsg", "All fields are mandatory.");
             prefillCreateForm(request, email, phone, fullName);
             request.getRequestDispatcher("/WEB-INF/views/admin/createStaff.jsp").forward(request, response);
@@ -165,23 +171,43 @@ public class AdminController extends HttpServlet {
         }
 
         UserDAO userDAO = new UserDAO();
-        // BR91: Platform email and phone unique validation
         if (userDAO.checkDuplicateAccount(email.trim(), phone.trim())) {
-            request.setAttribute("errorMsg",
-                    "Render duplicate account notification: Email or Phone is already registered.");
+            request.setAttribute("errorMsg", "Email or Phone is already registered.");
+            prefillCreateForm(request, email, phone, fullName);
+            request.getRequestDispatcher("/WEB-INF/views/admin/createStaff.jsp").forward(request, response);
+            return;
+        }
+
+        String avatarUrl = "";
+        try {
+            jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
+            if (filePart != null && filePart.getSize() > 0) {
+                String contentType = filePart.getContentType();
+                if (!"image/png".equalsIgnoreCase(contentType) &&
+                        !"image/jpeg".equalsIgnoreCase(contentType) &&
+                        !"image/jpg".equalsIgnoreCase(contentType)) {
+                    throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+                }
+                if (filePart.getSize() > 5242880) { // 5MB
+                    throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
+                }
+                avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff");
+            }
+        } catch (Exception ex) {
+            request.setAttribute("errorMsg", ex.getMessage() != null ? ex.getMessage() : "Avatar upload failed.");
             prefillCreateForm(request, email, phone, fullName);
             request.getRequestDispatcher("/WEB-INF/views/admin/createStaff.jsp").forward(request, response);
             return;
         }
 
         User staff = new User();
-        staff.setRoleId(2); // Role ID 2 = Staff (BR90)
+        staff.setRoleId(2); // Role ID 2 = Staff
         staff.setEmail(email.trim());
         staff.setPhoneNumber(phone.trim());
         staff.setStatus("Active");
         staff.setFullName(fullName.trim());
-        // Set secure temporary password hashed using SHA-256
-        staff.setPassword(PasswordUtils.hashSHA256("Staff123"));
+        staff.setAvatarUrl(avatarUrl);
+        staff.setPassword(PasswordUtils.hashSHA256(password.trim()));
 
         boolean success = userDAO.insertAccount(staff);
 
@@ -274,6 +300,36 @@ public class AdminController extends HttpServlet {
         staff.setPhoneNumber(phone.trim());
         staff.setFullName(fullName.trim());
         staff.setStatus(status);
+
+        String password = request.getParameter("password");
+        if (password != null && !password.trim().isEmpty()) {
+            staff.setPassword(password.trim());
+        } else {
+            staff.setPassword("[PROTECTED]");
+        }
+
+        String avatarUrl = "";
+        try {
+            jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
+            if (filePart != null && filePart.getSize() > 0) {
+                String contentType = filePart.getContentType();
+                if (!"image/png".equalsIgnoreCase(contentType) &&
+                        !"image/jpeg".equalsIgnoreCase(contentType) &&
+                        !"image/jpg".equalsIgnoreCase(contentType)) {
+                    throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+                }
+                if (filePart.getSize() > 5242880) { // 5MB
+                    throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
+                }
+                avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff_" + staffId);
+                staff.setAvatarUrl(avatarUrl);
+            }
+        } catch (Exception ex) {
+            request.getSession(true).setAttribute("toastErrorMsg",
+                    ex.getMessage() != null ? ex.getMessage() : "Avatar upload failed.");
+            response.sendRedirect(request.getContextPath() + "/admin/staff?action=detail&id=" + staffId);
+            return;
+        }
 
         boolean success = userDAO.updateAccount(staff);
 
@@ -375,24 +431,35 @@ public class AdminController extends HttpServlet {
     private void handleUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String roleParam = request.getParameter("roleId");
-        int roleId = 1; // Default to Customer (Role ID = 1)
-        if (roleParam != null && !roleParam.trim().isEmpty()) {
-            try {
-                roleId = Integer.parseInt(roleParam);
-            } catch (NumberFormatException ignored) {
-            }
+        UserDAO userDAO = new UserDAO();
+        List<User> list = new java.util.ArrayList<>();
+        
+        List<User> staff = userDAO.getAllUsersByRole(2);
+        if (staff != null) {
+            list.addAll(staff);
         }
 
-        UserDAO userDAO = new UserDAO();
-        List<User> list = userDAO.getAllUsersByRole(roleId);
+        List<User> owners = userDAO.getAllUsersByRole(3);
+        if (owners != null) {
+            list.addAll(owners);
+        }
+        
+        List<User> customers = userDAO.getAllUsersByRole(4);
+        if (customers != null) {
+            list.addAll(customers);
+        }
 
-        if (list == null || list.isEmpty()) {
+        if (list.isEmpty()) {
             request.setAttribute("message", "No users available");
         } else {
+            list.sort((u1, u2) -> {
+                if (u1.getCreatedAt() == null && u2.getCreatedAt() == null) return 0;
+                if (u1.getCreatedAt() == null) return 1;
+                if (u2.getCreatedAt() == null) return -1;
+                return u2.getCreatedAt().compareTo(u1.getCreatedAt());
+            });
             request.setAttribute("userList", list);
         }
-        request.setAttribute("currentRoleFilter", roleId);
         request.getRequestDispatcher("/WEB-INF/views/admin/userList.jsp").forward(request, response);
     }
 
@@ -511,5 +578,86 @@ public class AdminController extends HttpServlet {
             request.getSession(true).setAttribute("toastErrorMsg", "Deactivation failed.");
             response.sendRedirect(request.getContextPath() + "/admin/users?action=detail&id=" + userId);
         }
+    }
+
+    // =========================================================================
+    // Avatar Upload Helper
+    // =========================================================================
+
+    /**
+     * Saves uploaded avatar file to the runtime serving directory (getRealPath)
+     * AND also to src/main/webapp/uploads/avatars for persistence across builds.
+     * Uses pom.xml presence to locate the project root reliably.
+     *
+     * @param request  the HTTP request (for context path and realPath)
+     * @param filePart the uploaded file Part
+     * @param prefix   filename prefix e.g. "avatar_staff" or "avatar_staff_21"
+     * @return the context-relative URL to use in HTML/DB, e.g. "/uploads/avatars/filename.jpg"
+     */
+    private String saveUploadedAvatar(HttpServletRequest request,
+            jakarta.servlet.http.Part filePart, String prefix) throws Exception {
+
+        String originalName = filePart.getSubmittedFileName();
+        String extension = "";
+        if (originalName != null) {
+            int dot = originalName.lastIndexOf('.');
+            if (dot >= 0) {
+                extension = originalName.substring(dot).toLowerCase();
+            }
+        }
+        String uniqueName = prefix + "_" + System.currentTimeMillis() + extension;
+
+        // --- Primary: runtime serving directory ---
+        String runtimeDir = request.getServletContext().getRealPath("/uploads/avatars");
+        if (runtimeDir == null) {
+            runtimeDir = request.getServletContext().getRealPath("")
+                    + java.io.File.separator + "uploads"
+                    + java.io.File.separator + "avatars";
+        }
+        java.io.File runtimeDirFile = new java.io.File(runtimeDir);
+        if (!runtimeDirFile.exists()) {
+            runtimeDirFile.mkdirs();
+        }
+        String runtimeFilePath = runtimeDir + java.io.File.separator + uniqueName;
+        filePart.write(runtimeFilePath);
+
+        // --- Secondary: src/main/webapp for persistence across builds ---
+        try {
+            String deployPath = request.getServletContext().getRealPath("");
+            java.io.File projectRoot = findProjectRoot(new java.io.File(deployPath != null ? deployPath : ""));
+            if (projectRoot != null) {
+                java.io.File srcAvatarDir = new java.io.File(projectRoot,
+                        "src" + java.io.File.separator + "main"
+                        + java.io.File.separator + "webapp"
+                        + java.io.File.separator + "uploads"
+                        + java.io.File.separator + "avatars");
+                if (!srcAvatarDir.exists()) {
+                    srcAvatarDir.mkdirs();
+                }
+                java.nio.file.Files.copy(
+                        java.nio.file.Paths.get(runtimeFilePath),
+                        new java.io.File(srcAvatarDir, uniqueName).toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception ignored) {
+            // Non-critical: file already saved to runtime dir
+        }
+
+        return request.getContextPath() + "/uploads/avatars/" + uniqueName;
+    }
+
+    /**
+     * Walks up the directory tree from {@code dir} until it finds a directory
+     * containing pom.xml (= Maven project root), or returns null.
+     */
+    private java.io.File findProjectRoot(java.io.File dir) {
+        java.io.File current = dir;
+        while (current != null) {
+            if (new java.io.File(current, "pom.xml").exists()) {
+                return current;
+            }
+            current = current.getParentFile();
+        }
+        return null;
     }
 }

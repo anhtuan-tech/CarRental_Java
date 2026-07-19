@@ -11,8 +11,9 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
                 <style>
                     .staff-container {
-                        max-width: 1000px;
-                        margin: var(--space-8) auto;
+                        max-width: 100%;
+                        margin: 0 auto;
+                        padding: 0 var(--space-4);
                     }
 
                     .search-panel {

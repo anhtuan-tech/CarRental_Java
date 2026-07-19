@@ -27,26 +27,22 @@
             <div class="page-wrapper">
                 <div class="container">
 
-                    <!-- Breadcrumbs -->
-                    <div class="mb-4">
-                        <a href="${pageContext.request.contextPath}/admin/staff?action=list"
-                            style="color:var(--color-gray-light); font-size:0.9rem; font-weight:500;">← Back to Staff
-                            Index</a>
-                    </div>
+
 
                     <div class="form-card">
 
                         <div class="mb-4">
                             <h1 class="hero-title"
                                 style="font-size: 1.75rem; margin-bottom: 0.25rem; text-align: left;">Provision
-                                <span>New Staff</span></h1>
+                                <span>New Staff</span>
+                            </h1>
                             <p class="text-muted text-sm">Register new back-office personnel. A secure default hashed
                                 temporary password will be assigned.</p>
                         </div>
                         <div class="blue-line" style="margin-bottom: 2rem;"></div>
 
                         <form action="${pageContext.request.contextPath}/admin/staff?action=create" method="post"
-                            id="createStaffForm">
+                            id="createStaffForm" enctype="multipart/form-data">
 
                             <div class="form-group">
                                 <label for="fullName" class="form-label">Full Name <span
@@ -74,6 +70,26 @@
                                 <span class="form-hint">Enter 10-11 digit telephone numeric context.</span>
                             </div>
 
+                            <div class="form-group">
+                                <label for="password" class="form-label">Account Password <span
+                                        class="required">*</span></label>
+                                <input type="password" name="password" id="password" class="form-control"
+                                    placeholder="Enter account password..." required />
+                                <span class="form-hint">Password complexity rules apply.</span>
+                            </div>
+
+                            <div class="form-group" style="margin-top:var(--space-2);">
+                                <label class="form-label">Avatar Image</label>
+                                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
+                                    <div style="width:60px; height:60px; border-radius:50%; background:var(--orange-pale); border:2px solid var(--orange-border); display:flex; align-items:center; justify-content:center;">
+                                        <i class="bi bi-person-fill" style="font-size:1.75rem; color:var(--orange);"></i>
+                                    </div>
+                                    <input type="file" name="avatarFile" id="avatarFile" class="form-control"
+                                        accept="image/png, image/jpeg, image/jpg" style="flex-grow:1;" />
+                                </div>
+                                <span class="form-hint">Upload PNG/JPG to set avatar. Leave empty to keep.</span>
+                            </div>
+
                             <div style="margin-top:2rem; display:flex; gap:var(--space-3);">
                                 <button type="submit" class="btn btn-blue btn-sm">Create Staff Account</button>
                                 <a href="${pageContext.request.contextPath}/admin/staff?action=list"
@@ -87,21 +103,8 @@
             </div>
 
             <jsp:include page="/WEB-INF/views/common/footer.jsp" />
-                    <script>
-                        (function () {
-                            var el = document.getElementById('toast-data');
-                            if (el) {
-                                var err = el.getAttribute('data-error');
-                                var succ = el.getAttribute('data-success');
-                                var sessSucc = el.getAttribute('data-session-success');
-                                var sessErr = el.getAttribute('data-session-error');
-
-                                if (err && err.trim() !== '') showToast(err, 'error');
-                                if (succ && succ.trim() !== '') showToast(succ, 'success');
-                                if (sessSucc && sessSucc.trim() !== '') showToast(sessSucc, 'success');
-                                if (sessErr && sessErr.trim() !== '') showToast(sessErr, 'error');
-                            }
-                        })();
+            <script>
+                
 
                 document.getElementById('createStaffForm').addEventListener('submit', function (e) {
                     var email = document.getElementById('email').value.trim();
