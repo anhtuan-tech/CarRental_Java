@@ -261,6 +261,9 @@
                                         <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; min-width: 220px; text-align: right; border-left: 1px solid var(--color-dark-border); padding-left: var(--space-4);">
                                             <div>
                                                 <c:choose>
+                                                    <c:when test="${booking.status == 'Completed' || booking.status == 'Approved'}">
+                                                        <span class="status-badge" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;"><i class="bi bi-check-all"></i> Completed</span>
+                                                    </c:when>
                                                     <c:when test="${booking.status == 'Paid'}">
                                                         <span class="status-badge status-paid"><i class="bi bi-check-circle-fill"></i> Paid</span>
                                                     </c:when>
@@ -295,6 +298,11 @@
                                                 </span>
                                                 
                                                 <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                                    <c:if test="${booking.status == 'Completed' || booking.status == 'Approved'}">
+                                                        <a href="${pageContext.request.contextPath}/feedback?action=create&carId=${booking.carId}" class="btn btn-primary" style="background: var(--orange); border-color: var(--orange); font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-md); text-decoration: none;">
+                                                            <i class="bi bi-star-fill"></i> Rate & Review
+                                                        </a>
+                                                    </c:if>
                                                     <c:if test="${booking.status == 'Pending Payment'}">
                                                         <a href="${pageContext.request.contextPath}/customer/bookings?action=pay&bookingId=${booking.bookingId}" class="btn btn-primary" style="background: var(--orange); border-color: var(--orange); font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-md);">
                                                             Pay

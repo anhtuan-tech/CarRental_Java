@@ -265,6 +265,50 @@ public class FeedbackDAO {
         return false;
     }
 
+    /**
+     * Retrieve all feedbacks for cars owned by a specific Owner.
+     */
+    public List<Feedback> getFeedbacksByOwnerId(int ownerId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        List<Feedback> list = new ArrayList<>();
+        String query = "SELECT f.feedback_id, f.booking_id, f.customer_id, f.rating, f.comment, "
+                + "f.owner_reply, f.created_at, f.updated_at, p.full_name, "
+                + "c.car_id, c.car_name, c.brand "
+                + "FROM Feedback f "
+                + "JOIN Booking b ON f.booking_id = b.booking_id "
+                + "JOIN Car c ON b.car_id = c.car_id "
+                + "JOIN Profile p ON f.customer_id = p.user_id "
+                + "WHERE c.owner_id = ? "
+                + "ORDER BY f.created_at DESC";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            while (rs != null && rs.next()) {
+                Feedback f = mapRowToFeedback(rs);
+                f.setReviewerName(maskName(rs.getString("full_name")));
+                f.setCarId(rs.getInt("car_id"));
+                f.setCarName(rs.getString("car_name"));
+                f.setCarBrand(rs.getString("brand"));
+                list.add(f);
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "getFeedbacksByOwnerId failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return list;
+    }
+
+    /**
+     * Update owner's reply for a feedback.
+     */
+    public boolean updateOwnerReply(int feedbackId, String ownerReply) {
+        DBContext db = new DBContext();
+        String query = "UPDATE Feedback SET owner_reply = ?, updated_at = GETDATE() WHERE feedback_id = ?";
+        int affected = db.executeQuery(query, new Object[]{ownerReply != null ? ownerReply.trim() : "", feedbackId});
+        return affected > 0;
+    }
+
     private int getCarIdFromBookingId(int bookingId) {
         DBContext db = new DBContext();
         ResultSet rs = null;

@@ -56,7 +56,7 @@
         </c:when>
 
         <%-- OWNER --%>
-        <c:when test="${sessionScope.user != null && sessionScope.user.roleId == 4}">
+        <c:when test="${sessionScope.user != null && (sessionScope.user.roleId == 3 || sessionScope.user.roleId == 4)}">
             <a href="${pageContext.request.contextPath}/owner/dashboard" class="navbar-brand">
                 <i class="bi bi-key-fill" style="color:var(--orange);"></i> Owner<span>Hub</span>
             </a>
@@ -64,6 +64,7 @@
                 <li><a href="${pageContext.request.contextPath}/owner/dashboard" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
                 <li><a href="${pageContext.request.contextPath}/owner/cars" class="nav-link"><i class="bi bi-car-front-fill"></i> My Fleet</a></li>
                 <li><a href="${pageContext.request.contextPath}/owner/orders" class="nav-link"><i class="bi bi-receipt-cutoff"></i> Rental Orders</a></li>
+                <li><a href="${pageContext.request.contextPath}/owner/feedbacks" class="nav-link"><i class="bi bi-star-fill"></i> Customer Reviews</a></li>
                 <li><a href="${pageContext.request.contextPath}/owner/earning" class="nav-link"><i class="bi bi-wallet2"></i> Earnings</a></li>
                 <li class="navbar-divider"></li>
                 <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
@@ -92,7 +93,7 @@
                 <c:choose>
                     <c:when test="${sessionScope.user != null}">
                         <li><a href="${pageContext.request.contextPath}/customer/bookings" class="nav-link"><i class="bi bi-calendar2-check"></i> My Bookings</a></li>
-                        <li><a href="${pageContext.request.contextPath}/feedbacks" class="nav-link"><i class="bi bi-star-fill"></i> My Reviews</a></li>
+                        <li><a href="${pageContext.request.contextPath}/feedback" class="nav-link"><i class="bi bi-star-fill"></i> My Reviews</a></li>
                         <li class="navbar-divider"></li>
                         <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
                             <c:choose>

@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Controller servlet handling Forgot Password workflow (UC-07).
  */
-@WebServlet(name = "ForgotPasswordController", urlPatterns = {"/forgotPassword"})
+@WebServlet(name = "ForgotPasswordController", urlPatterns = {"/forgot-password", "/forgotPassword"})
 public class ForgotPasswordController extends HttpServlet {
 
     @Override
@@ -40,11 +40,19 @@ public class ForgotPasswordController extends HttpServlet {
         User user = userDAO.checkEmailExist(email.trim());
 
         if (user != null) {
-            // Mock email sending
-            EmailServices.sendResetPasswordEmail(email.trim());
-            // Set message and redirect
-            request.getSession(true).setAttribute("toastSuccessMsg", "Please check your email.");
-            response.sendRedirect(request.getContextPath() + "/login/customer");
+            // Generate a secure random 6-digit OTP code
+            int otpVal = (int) (Math.random() * 900000) + 100000;
+            String otp = String.valueOf(otpVal);
+
+            // Send verification code to email (with mock fallback to console)
+            EmailServices.sendOtpEmail(email.trim(), otp);
+
+            // Store in session
+            jakarta.servlet.http.HttpSession session = request.getSession(true);
+            session.setAttribute("resetEmail", email.trim());
+            session.setAttribute("recoveryOtp", otp);
+            session.setAttribute("toastSuccessMsg", "Verification code sent! Please check your email.");
+            response.sendRedirect(request.getContextPath() + "/verify-otp");
         } else {
             request.setAttribute("errorMsg", "Email does not exist.");
             request.setAttribute("email", email);

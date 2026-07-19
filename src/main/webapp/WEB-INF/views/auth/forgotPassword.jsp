@@ -79,10 +79,6 @@
                             Remember your password?
                             <a href="${pageContext.request.contextPath}/login/customer">Login here</a>
                         </div>
-                        <div class="auth-footer" style="margin-top:0.75rem;">
-                            <a href="${pageContext.request.contextPath}/home"
-                                style="color:var(--color-gray-light); font-size:0.8rem;">← Back to Home</a>
-                        </div>
 
                     </div>
                 </div>

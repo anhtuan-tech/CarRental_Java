@@ -274,6 +274,16 @@ public class FeedbackController extends HttpServlet {
             return;
         }
 
+        // 24-hour limit check
+        if (feedback.getCreatedAt() != null) {
+            long hours = java.time.Duration.between(feedback.getCreatedAt(), java.time.LocalDateTime.now()).toHours();
+            if (hours >= 24) {
+                request.getSession(true).setAttribute("toastErrorMsg", "Feedback can only be edited within 24 hours of submission.");
+                response.sendRedirect(request.getContextPath() + "/feedback?action=list");
+                return;
+            }
+        }
+
         Car car = new CarDAO().getCarById(feedback.getCarId());
         request.setAttribute("feedback", feedback);
         request.setAttribute("car", car);
@@ -295,6 +305,16 @@ public class FeedbackController extends HttpServlet {
         if (feedback == null || feedback.getCustomerId() != user.getUserId()) {
             response.sendRedirect(request.getContextPath() + "/feedback?action=list");
             return;
+        }
+
+        // 24-hour limit check
+        if (feedback.getCreatedAt() != null) {
+            long hours = java.time.Duration.between(feedback.getCreatedAt(), java.time.LocalDateTime.now()).toHours();
+            if (hours >= 24) {
+                request.getSession(true).setAttribute("toastErrorMsg", "Feedback can only be edited within 24 hours of submission.");
+                response.sendRedirect(request.getContextPath() + "/feedback?action=list");
+                return;
+            }
         }
 
         int rating = 0;
@@ -348,6 +368,16 @@ public class FeedbackController extends HttpServlet {
             request.getSession(true).setAttribute("toastErrorMsg", "Deleted false.");
             response.sendRedirect(request.getContextPath() + "/feedback?action=list");
             return;
+        }
+
+        // 24-hour limit check
+        if (feedback.getCreatedAt() != null) {
+            long hours = java.time.Duration.between(feedback.getCreatedAt(), java.time.LocalDateTime.now()).toHours();
+            if (hours >= 24) {
+                request.getSession(true).setAttribute("toastErrorMsg", "Feedback can only be deleted within 24 hours of submission.");
+                response.sendRedirect(request.getContextPath() + "/feedback?action=list");
+                return;
+            }
         }
 
         boolean success = feedbackDAO.deleteFeedback(feedbackId);

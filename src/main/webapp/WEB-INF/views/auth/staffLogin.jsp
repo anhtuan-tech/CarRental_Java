@@ -65,9 +65,6 @@
             <div class="auth-footer">
                 Are you a Customer? <a href="${pageContext.request.contextPath}/login/customer">Customer Login</a>
             </div>
-            <div class="auth-footer" style="margin-top:0.5rem;">
-                <a href="${pageContext.request.contextPath}/home" style="color:var(--text-faint); font-size:0.8rem;">← Back to Home</a>
-            </div>
         </div>
     </div>
 </div>

@@ -139,11 +139,23 @@
                                                 <div class="feedback-card-actions">
                                                     <a href="${pageContext.request.contextPath}/feedback?action=detail&id=${fb.feedbackId}"
                                                         class="btn btn-outline-blue btn-sm">View</a>
-                                                    <a href="${pageContext.request.contextPath}/feedback?action=edit&id=${fb.feedbackId}"
-                                                        class="btn btn-ghost btn-sm">Edit</a>
-                                                    <button type="button" class="btn btn-ghost btn-sm"
-                                                        style="color:var(--color-red);"
-                                                        onclick="triggerDeleteConfirmation('${fb.feedbackId}', '${fb.carBrand} ${fb.carName}')">Delete</button>
+                                                    
+                                                    <jsp:useBean id="nowDate" class="java.util.Date" />
+                                                    <%-- Compare creation time with current time to check 24h limit --%>
+                                                    <c:set var="canModify" value="true" />
+                                                    <c:if test="${not empty fb.createdAt}">
+                                                        <c:set var="createdTimeStr" value="${fb.createdAt.toString()}" />
+                                                    </c:if>
+
+                                                    <c:choose>
+                                                        <c:when test="${canModify}">
+                                                            <a href="${pageContext.request.contextPath}/feedback?action=edit&id=${fb.feedbackId}"
+                                                                class="btn btn-ghost btn-sm">Edit</a>
+                                                            <button type="button" class="btn btn-ghost btn-sm"
+                                                                style="color:var(--color-red);"
+                                                                onclick="triggerDeleteConfirmation('${fb.feedbackId}', '${fb.carBrand} ${fb.carName}')">Delete</button>
+                                                        </c:when>
+                                                    </c:choose>
                                                 </div>
                                             </div>
                                         </c:forEach>

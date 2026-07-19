@@ -84,9 +84,6 @@
             <div class="auth-footer" style="margin-top:0.5rem;">
                 Are you an Owner? <a href="${pageContext.request.contextPath}/login/owner">Login here</a>
             </div>
-            <div class="auth-footer" style="margin-top:0.5rem;">
-                <a href="${pageContext.request.contextPath}/home" style="color:var(--text-faint); font-size:0.8rem;">← Back to Home</a>
-            </div>
         </div>
     </div>
 </div>
