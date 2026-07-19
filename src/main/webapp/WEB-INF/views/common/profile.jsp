@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-        <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
             <!DOCTYPE html>
             <html lang="en">
 
@@ -266,7 +267,7 @@
                                 style="cursor:pointer; position:relative;" title="Click to change avatar">
                                 <c:choose>
                                     <c:when test="${not empty profile.avatarUrl}">
-                                        <img id="headerAvatarPreview" src="${profile.avatarUrl}"
+                                        <img id="headerAvatarPreview" src="${fn:startsWith(profile.avatarUrl, 'http') || fn:startsWith(profile.avatarUrl, pageContext.request.contextPath) ? profile.avatarUrl : pageContext.request.contextPath.concat(profile.avatarUrl)}"
                                             style="width:100%; height:100%; border-radius:50%; object-fit:cover;"
                                             alt="${profile.fullName}" />
                                     </c:when>

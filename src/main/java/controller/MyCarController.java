@@ -107,38 +107,12 @@ public class MyCarController extends HttpServlet {
             String imageString = parts.length > 1 ? parts[1] : parts[0];
             byte[] imageBytes = java.util.Base64.getDecoder().decode(imageString);
 
-            // Create uploads directory in Tomcat deployment
-            String uploadPath = request.getServletContext().getRealPath("") + java.io.File.separator + "uploads" + java.io.File.separator + "cars";
-            java.io.File uploadDir = new java.io.File(uploadPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            // Generate unique filename
             String fileName = "car_" + java.util.UUID.randomUUID().toString() + ".jpg";
-            java.io.File file = new java.io.File(uploadDir, fileName);
-
-            // Write to deployment directory
-            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
-                fos.write(imageBytes);
-            }
-
-            // Write to project source directory so it persists across rebuilds
-            String sourcePath = "d:/SU26 07/SWD392/CarRental/src/main/webapp/uploads/cars";
-            java.io.File sourceDir = new java.io.File(sourcePath);
-            if (!sourceDir.exists()) {
-                sourceDir.mkdirs();
-            }
-            java.io.File sourceFile = new java.io.File(sourceDir, fileName);
-            try (java.io.FileOutputStream fosSource = new java.io.FileOutputStream(sourceFile)) {
-                fosSource.write(imageBytes);
-            }
-
-            String relativeUrl = request.getContextPath() + "/uploads/cars/" + fileName;
+            String relativeUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, fileName, "cars", request);
             response.getWriter().write("{\"success\":true,\"imageUrl\":\"" + relativeUrl + "\"}");
 
         } catch (Exception e) {
-            e.printStackTrace(); // In ra console để gỡ lỗi!
+            e.printStackTrace();
             response.getWriter().write("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
         }
     }

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <nav class="navbar">
     <c:choose>
@@ -18,7 +19,7 @@
                 <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
                     <c:choose>
                         <c:when test="${not empty sessionScope.user.avatarUrl}">
-                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                            <img src="${fn:startsWith(sessionScope.user.avatarUrl, 'http') || fn:startsWith(sessionScope.user.avatarUrl, pageContext.request.contextPath) ? sessionScope.user.avatarUrl : pageContext.request.contextPath.concat(sessionScope.user.avatarUrl)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
                         </c:when>
                         <c:otherwise>
                             <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
@@ -43,7 +44,7 @@
                 <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
                     <c:choose>
                         <c:when test="${not empty sessionScope.user.avatarUrl}">
-                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                            <img src="${fn:startsWith(sessionScope.user.avatarUrl, 'http') || fn:startsWith(sessionScope.user.avatarUrl, pageContext.request.contextPath) ? sessionScope.user.avatarUrl : pageContext.request.contextPath.concat(sessionScope.user.avatarUrl)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
                         </c:when>
                         <c:otherwise>
                             <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
@@ -70,7 +71,7 @@
                 <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
                     <c:choose>
                         <c:when test="${not empty sessionScope.user.avatarUrl}">
-                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                            <img src="${fn:startsWith(sessionScope.user.avatarUrl, 'http') || fn:startsWith(sessionScope.user.avatarUrl, pageContext.request.contextPath) ? sessionScope.user.avatarUrl : pageContext.request.contextPath.concat(sessionScope.user.avatarUrl)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
                         </c:when>
                         <c:otherwise>
                             <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
@@ -98,7 +99,7 @@
                         <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.user.avatarUrl}">
-                                    <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                                    <img src="${fn:startsWith(sessionScope.user.avatarUrl, 'http') || fn:startsWith(sessionScope.user.avatarUrl, pageContext.request.contextPath) ? sessionScope.user.avatarUrl : pageContext.request.contextPath.concat(sessionScope.user.avatarUrl)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
                                 </c:when>
                                 <c:otherwise>
                                     <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>

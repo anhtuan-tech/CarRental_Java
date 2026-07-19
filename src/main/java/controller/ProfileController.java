@@ -134,35 +134,7 @@ public class ProfileController extends HttpServlet {
                 byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data.trim());
                 
                 String uniqueName = "avatar_cropped_" + user.getUserId() + "_" + System.currentTimeMillis() + ".jpg";
-                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "avatars";
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
-                
-                String targetFilePath = uploadPath + File.separator + uniqueName;
-                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFilePath)) {
-                    fos.write(imageBytes);
-                }
-                
-                try {
-                    String baseRealPath = request.getServletContext().getRealPath("");
-                    if (baseRealPath != null && baseRealPath.contains("target")) {
-                        String sourcePath = baseRealPath.split("target")[0] + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "uploads" + File.separator + "avatars";
-                        File sourceDir = new File(sourcePath);
-                        if (!sourceDir.exists()) {
-                            sourceDir.mkdirs();
-                        }
-                        java.nio.file.Files.copy(
-                            java.nio.file.Paths.get(targetFilePath),
-                            java.nio.file.Paths.get(sourcePath + File.separator + uniqueName),
-                            java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                        );
-                    }
-                } catch (Exception ignored) {
-                }
-                
-                avatarUrl = request.getContextPath() + "/uploads/avatars/" + uniqueName;
+                avatarUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, uniqueName, "avatars", request);
             } catch (Exception ex) {
                 request.setAttribute("errorMsg", "Failed to process cropped avatar image: " + ex.getMessage());
                 request.setAttribute("user", user);
@@ -186,41 +158,7 @@ public class ProfileController extends HttpServlet {
                         throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
                     }
 
-                    String fileName = getSubmittedFileName(filePart);
-                    String extension = "";
-                    int dotIndex = fileName.lastIndexOf('.');
-                    if (dotIndex >= 0) {
-                        extension = fileName.substring(dotIndex);
-                    }
-
-                    String uniqueName = "avatar_" + user.getUserId() + "_" + System.currentTimeMillis() + extension;
-                    String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "avatars";
-                    File uploadDir = new File(uploadPath);
-                    if (!uploadDir.exists()) {
-                        uploadDir.mkdirs();
-                    }
-
-                    String targetFilePath = uploadPath + File.separator + uniqueName;
-                    filePart.write(targetFilePath);
-
-                    try {
-                        String baseRealPath = request.getServletContext().getRealPath("");
-                        if (baseRealPath != null && baseRealPath.contains("target")) {
-                            String sourcePath = baseRealPath.split("target")[0] + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "uploads" + File.separator + "avatars";
-                            File sourceDir = new File(sourcePath);
-                            if (!sourceDir.exists()) {
-                                sourceDir.mkdirs();
-                            }
-                            java.nio.file.Files.copy(
-                                java.nio.file.Paths.get(targetFilePath),
-                                java.nio.file.Paths.get(sourcePath + File.separator + uniqueName),
-                                java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                            );
-                        }
-                    } catch (Exception ignored) {
-                    }
-
-                    avatarUrl = request.getContextPath() + "/uploads/avatars/" + uniqueName;
+                    avatarUrl = utils.FileUploadUtil.saveUploadedFile(filePart, "avatars", request);
                 }
             } catch (IllegalArgumentException ex) {
                 request.setAttribute("errorMsg", ex.getMessage());

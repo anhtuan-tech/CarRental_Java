@@ -596,54 +596,7 @@ public class AdminController extends HttpServlet {
      */
     private String saveUploadedAvatar(HttpServletRequest request,
             jakarta.servlet.http.Part filePart, String prefix) throws Exception {
-
-        String originalName = filePart.getSubmittedFileName();
-        String extension = "";
-        if (originalName != null) {
-            int dot = originalName.lastIndexOf('.');
-            if (dot >= 0) {
-                extension = originalName.substring(dot).toLowerCase();
-            }
-        }
-        String uniqueName = prefix + "_" + System.currentTimeMillis() + extension;
-
-        // --- Primary: runtime serving directory ---
-        String runtimeDir = request.getServletContext().getRealPath("/uploads/avatars");
-        if (runtimeDir == null) {
-            runtimeDir = request.getServletContext().getRealPath("")
-                    + java.io.File.separator + "uploads"
-                    + java.io.File.separator + "avatars";
-        }
-        java.io.File runtimeDirFile = new java.io.File(runtimeDir);
-        if (!runtimeDirFile.exists()) {
-            runtimeDirFile.mkdirs();
-        }
-        String runtimeFilePath = runtimeDir + java.io.File.separator + uniqueName;
-        filePart.write(runtimeFilePath);
-
-        // --- Secondary: src/main/webapp for persistence across builds ---
-        try {
-            String deployPath = request.getServletContext().getRealPath("");
-            java.io.File projectRoot = findProjectRoot(new java.io.File(deployPath != null ? deployPath : ""));
-            if (projectRoot != null) {
-                java.io.File srcAvatarDir = new java.io.File(projectRoot,
-                        "src" + java.io.File.separator + "main"
-                        + java.io.File.separator + "webapp"
-                        + java.io.File.separator + "uploads"
-                        + java.io.File.separator + "avatars");
-                if (!srcAvatarDir.exists()) {
-                    srcAvatarDir.mkdirs();
-                }
-                java.nio.file.Files.copy(
-                        java.nio.file.Paths.get(runtimeFilePath),
-                        new java.io.File(srcAvatarDir, uniqueName).toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (Exception ignored) {
-            // Non-critical: file already saved to runtime dir
-        }
-
-        return request.getContextPath() + "/uploads/avatars/" + uniqueName;
+        return utils.FileUploadUtil.saveUploadedFile(filePart, "avatars", request);
     }
 
     /**
