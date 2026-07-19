@@ -350,13 +350,7 @@ public class CarController extends HttpServlet {
             return;
         }
 
-        // BR85: Enforce that status mutations are only permitted if currently Pending_Approval
-        if (!"Pending_Approval".equalsIgnoreCase(car.getStatus())) {
-            request.setAttribute("errorMsg", "Transition locked: Vehicle status is not Pending Approval.");
-            request.setAttribute("carDetail", car);
-            request.getRequestDispatcher("/WEB-INF/views/staff/staffCarDetail.jsp").forward(request, response);
-            return;
-        }
+        // Allow staff to mutate status freely regardless of the current status
 
         // BR86: If status is Rejected, a reason note is mandatory
         if ("Rejected".equalsIgnoreCase(targetStatus) && (reason == null || reason.trim().isEmpty())) {
