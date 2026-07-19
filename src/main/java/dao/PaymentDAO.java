@@ -25,28 +25,39 @@ public class PaymentDAO {
      */
     public int insertPayment(Payment payment) {
         DBContext db = new DBContext();
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement statement = null;
         ResultSet rs = null;
-        String query = "INSERT INTO Payment (booking_id, amount, payment_method, transaction_ref, payment_status, paid_at) "
-                + "OUTPUT INSERTED.payment_id "
+        
+        String query = "INSERT INTO Payment (booking_id, amount, payment_method, transaction_reference, payment_status, paid_at) "
                 + "VALUES (?, ?, ?, ?, ?, GETDATE())";
 
-        Object[] params = new Object[]{
-                payment.getBookingId(),
-                payment.getAmount(),
-                payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "VNPAY",
-                payment.getTransactionRef() != null ? payment.getTransactionRef() : "",
-                payment.getPaymentStatus() != null ? payment.getPaymentStatus() : "Completed"
-        };
-
         try {
-            rs = db.executeSelectQuery(query, params);
-            if (rs != null && rs.next()) {
-                return rs.getInt(1);
+            conn = db.getConnection();
+            statement = conn.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS);
+            statement.setInt(1, payment.getBookingId());
+            statement.setBigDecimal(2, payment.getAmount());
+            statement.setString(3, payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "VNPAY");
+            statement.setString(4, payment.getTransactionRef() != null ? payment.getTransactionRef() : "");
+            statement.setString(5, payment.getPaymentStatus() != null ? payment.getPaymentStatus() : "Completed");
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                rs = statement.getGeneratedKeys();
+                if (rs != null && rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException ex) {
-            logger.log(Level.SEVERE, "insertPayment failed for bookingId: " + payment.getBookingId(), ex);
+            logger.log(Level.SEVERE, "insertPayment failed directly for bookingId: " + payment.getBookingId(), ex);
         } finally {
-            db.closeResources(rs);
+            try {
+                if (rs != null) rs.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Error closing resources in insertPayment", e);
+            }
         }
         return -1;
     }
@@ -60,7 +71,7 @@ public class PaymentDAO {
     public Payment getPaymentByBookingId(int bookingId) {
         DBContext db = new DBContext();
         ResultSet rs = null;
-        String query = "SELECT payment_id, booking_id, amount, payment_method, transaction_ref, payment_status, paid_at "
+        String query = "SELECT payment_id, booking_id, amount, payment_method, transaction_reference, payment_status, paid_at "
                 + "FROM Payment WHERE booking_id = ?";
         try {
             rs = db.executeSelectQuery(query, new Object[]{bookingId});
@@ -70,7 +81,7 @@ public class PaymentDAO {
                 p.setBookingId(rs.getInt("booking_id"));
                 p.setAmount(rs.getBigDecimal("amount"));
                 p.setPaymentMethod(rs.getString("payment_method"));
-                p.setTransactionRef(rs.getString("transaction_ref"));
+                p.setTransactionRef(rs.getString("transaction_reference"));
                 p.setPaymentStatus(rs.getString("payment_status"));
 
                 Timestamp paid = rs.getTimestamp("paid_at");

@@ -83,18 +83,16 @@
 
         <!-- Search & Filter Panel -->
         <div class="filters-panel">
-            <form action="${pageContext.request.contextPath}/cars" method="get" class="filters-form">
-                <input type="hidden" name="action" value="search"/>
-
-                <div class="form-group" style="margin-bottom:0;">
+            <div class="filters-form" style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; width: 100%;">
+                <div class="form-group" style="margin-bottom:0; flex: 1; min-width: 200px;">
                     <label for="query" class="form-label">Search Keyword</label>
                     <div class="input-wrapper">
-                        <span class="input-icon">🔍</span>
+                        <span class="input-icon"><i class="bi bi-search" style="font-size: 0.95rem;"></i></span>
                         <input type="text" id="query" name="query" class="form-control" placeholder="Mercedes, Audi, SUV..." value="<c:out value='${requestScope.queryVal}'/>"/>
                     </div>
                 </div>
-
-                <div class="form-group" style="margin-bottom:0;">
+ 
+                <div class="form-group" style="margin-bottom:0; flex: 1; min-width: 150px;">
                     <label for="typeId" class="form-label">Car Type</label>
                     <select id="typeId" name="typeId" class="form-control">
                         <option value="">All Types</option>
@@ -105,21 +103,17 @@
                         </c:forEach>
                     </select>
                 </div>
-
-                <div class="form-group" style="margin-bottom:0;">
+ 
+                <div class="form-group" style="margin-bottom:0; width: 130px;">
                     <label for="minPrice" class="form-label">Min Price (VND)</label>
                     <input type="number" id="minPrice" name="minPrice" class="form-control" placeholder="Min" value="<c:out value='${requestScope.minPriceVal}'/>"/>
                 </div>
-
-                <div class="form-group" style="margin-bottom:0;">
+ 
+                <div class="form-group" style="margin-bottom:0; width: 130px;">
                     <label for="maxPrice" class="form-label">Max Price (VND)</label>
                     <input type="number" id="maxPrice" name="maxPrice" class="form-control" placeholder="Max" value="<c:out value='${requestScope.maxPriceVal}'/>"/>
                 </div>
-
-                <button type="submit" class="btn btn-blue btn-lg" style="height:44px;">
-                    Apply Filters
-                </button>
-            </form>
+            </div>
         </div>
 
         <!-- Fleet Grid -->
@@ -137,14 +131,14 @@
             <c:when test="${not empty cars}">
                 <div class="cars-grid">
                     <c:forEach var="car" items="${cars}">
-                        <div class="car-card" onclick="window.location.href='${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}'">
+                        <div class="car-card" data-type-id="${car.typeId}" data-price="${car.pricePerDay}" onclick="window.location.href='${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}'">
                             <div class="car-card-image">
                                 <c:choose>
                                     <c:when test="${not empty car.primaryImageUrl}">
                                         <img src="${car.primaryImageUrl}" alt="${car.carName}" loading="lazy"/>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="car-card-placeholder">🚘</div>
+                                        <div class="car-card-placeholder"><i class="bi bi-car-front-fill" style="font-size:2rem; color:var(--color-gray-mid);"></i></div>
                                     </c:otherwise>
                                 </c:choose>
                                 <span class="car-badge">
@@ -221,9 +215,90 @@
     </div>
     <div class="footer-bottom">
         <span>© 2026 CarRental. All rights reserved.</span>
-        <span>Made with ❤️ in Vietnam</span>
+        <span>Made with <i class="bi bi-heart-fill" style="color:var(--color-red);"></i> in Vietnam</span>
     </div>
 </footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const queryInput = document.getElementById('query');
+        const typeSelect = document.getElementById('typeId');
+        const minPriceInput = document.getElementById('minPrice');
+        const maxPriceInput = document.getElementById('maxPrice');
+        const carsGrid = document.querySelector('.cars-grid');
+        const countSpan = document.querySelector('.section-header .text-muted');
+
+        function filterCars() {
+            const queryVal = queryInput.value.toLowerCase().trim();
+            const typeVal = typeSelect.value;
+            const minPriceVal = parseFloat(minPriceInput.value) || 0;
+            const maxPriceVal = parseFloat(maxPriceInput.value) || Infinity;
+
+            const cards = document.querySelectorAll('.car-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardName = card.querySelector('.car-card-name').textContent.toLowerCase();
+                const cardBrand = card.querySelector('.car-card-brand').textContent.toLowerCase();
+                const cardTypeId = card.getAttribute('data-type-id');
+                const cardPrice = parseFloat(card.getAttribute('data-price')) || 0;
+
+                const matchesQuery = cardName.includes(queryVal) || cardBrand.includes(queryVal);
+                const matchesType = !typeVal || cardTypeId === typeVal;
+                const matchesMinPrice = cardPrice >= minPriceVal;
+                const matchesMaxPrice = cardPrice <= maxPriceVal;
+
+                if (matchesQuery && matchesType && matchesMinPrice && matchesMaxPrice) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update count label
+            if (countSpan) {
+                if (visibleCount > 0) {
+                    countSpan.textContent = `${visibleCount} cars found`;
+                } else {
+                    countSpan.textContent = `No cars found`;
+                }
+            }
+
+            // Toggle empty state
+            let emptyState = document.getElementById('carsGridEmptyState');
+            if (visibleCount === 0) {
+                if (!emptyState) {
+                    emptyState = document.createElement('div');
+                    emptyState.id = 'carsGridEmptyState';
+                    emptyState.className = 'empty-state';
+                    emptyState.style.gridColumn = '1 / -1';
+                    emptyState.style.textAlign = 'center';
+                    emptyState.style.padding = '3rem';
+                    emptyState.innerHTML = `
+                        <div class="empty-state-icon" style="font-size:3rem; color:var(--orange);"><i class="bi bi-car-front-fill"></i></div>
+                        <div class="empty-state-title" style="color:var(--color-white); font-size:1.25rem; margin-top:1rem; font-weight:700;">No cars match your filter criteria</div>
+                        <p class="text-muted text-sm" style="margin-top:0.5rem;">Try adjusting your query or price range.</p>
+                    `;
+                    if (carsGrid) {
+                        carsGrid.appendChild(emptyState);
+                    }
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            } else {
+                if (emptyState) {
+                    emptyState.style.display = 'none';
+                }
+            }
+        }
+
+        if (queryInput) queryInput.addEventListener('input', filterCars);
+        if (typeSelect) typeSelect.addEventListener('change', filterCars);
+        if (minPriceInput) minPriceInput.addEventListener('input', filterCars);
+        if (maxPriceInput) maxPriceInput.addEventListener('input', filterCars);
+    });
+</script>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp" />
 </body>

@@ -95,7 +95,7 @@
     --t-slow: all 0.4s ease;
 
     /* Navbar */
-    --navbar-h: 64px;
+    --navbar-h: 76px;
 
     /* Legacy aliases (for pages still using old class names) */
     --color-blue:        #F97316;
@@ -135,7 +135,7 @@
     --space-12: 3rem;
     --space-16: 4rem;
     --space-20: 5rem;
-    --navbar-height: 64px;
+    --navbar-height: 76px;
     --shadow-sm-old:  0 1px 3px rgba(0,0,0,0.08);
     --shadow-md-old:  0 4px 6px rgba(0,0,0,0.07);
     --shadow-lg-old:  0 10px 15px rgba(0,0,0,0.08);

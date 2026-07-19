@@ -23,7 +23,7 @@ public class HomeController extends HttpServlet {
             throws ServletException, IOException {
 
         CarDAO carDAO = new CarDAO();
-        List<Car> cars = carDAO.getAvailableCars();
+        List<Car> cars = carDAO.getTop3MostRentedCars();
 
         request.setAttribute("cars", cars);
         request.getRequestDispatcher("/WEB-INF/views/common/homepage.jsp").forward(request, response);

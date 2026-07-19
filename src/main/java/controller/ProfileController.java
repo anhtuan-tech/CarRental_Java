@@ -45,22 +45,27 @@ public class ProfileController extends HttpServlet {
         UserDAO userDAO = new UserDAO();
 
         User user = userDAO.getUserById(userSession.getUserId());
-        Profile profile = userDAO.getProfileByUserId(userSession.getUserId());
-
-        if (user == null || profile == null) {
+        if (user == null) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
+        }
+
+        Profile profile = userDAO.getProfileByUserId(userSession.getUserId());
+        if (profile == null) {
+            profile = new Profile();
+            profile.setUserId(user.getUserId());
+            profile.setFullName(user.getFullName() != null ? user.getFullName() : "");
+            profile.setAvatarUrl("");
+            profile.setDriverLicense("");
+            profile.setIdCardNo("");
+            profile.setAddress("");
+            userDAO.createProfile(profile);
         }
 
         request.setAttribute("user", user);
         request.setAttribute("profile", profile);
 
-        String action = request.getParameter("action");
-        if ("edit".equalsIgnoreCase(action)) {
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
-        } else {
-            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
-        }
+        request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -108,44 +113,38 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "Full Name and Phone Number are mandatory.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
         String avatarUrl = profile.getAvatarUrl();
-
+        String croppedAvatarBase64 = null;
         try {
-            Part filePart = request.getPart("avatarFile");
-            if (filePart != null && filePart.getSize() > 0) {
-                // Validate format & size (BR11)
-                String contentType = filePart.getContentType();
-                if (!"image/png".equalsIgnoreCase(contentType) &&
-                    !"image/jpeg".equalsIgnoreCase(contentType) &&
-                    !"image/jpg".equalsIgnoreCase(contentType)) {
-                    throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
-                }
+            Part croppedPart = request.getPart("croppedAvatarBase64");
+            croppedAvatarBase64 = getValueFromPart(croppedPart);
+        } catch (Exception ignored) {}
+        if (croppedAvatarBase64 == null || croppedAvatarBase64.trim().isEmpty()) {
+            croppedAvatarBase64 = request.getParameter("croppedAvatarBase64");
+        }
 
-                if (filePart.getSize() > 5242880) { // 5MB
-                    throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
-                }
-
-                String fileName = getSubmittedFileName(filePart);
-                String extension = "";
-                int dotIndex = fileName.lastIndexOf('.');
-                if (dotIndex >= 0) {
-                    extension = fileName.substring(dotIndex);
-                }
-
-                String uniqueName = "avatar_" + user.getUserId() + "_" + System.currentTimeMillis() + extension;
+        if (croppedAvatarBase64 != null && !croppedAvatarBase64.trim().isEmpty()) {
+            try {
+                String[] parts = croppedAvatarBase64.split(",");
+                String base64Data = parts.length > 1 ? parts[1] : parts[0];
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data.trim());
+                
+                String uniqueName = "avatar_cropped_" + user.getUserId() + "_" + System.currentTimeMillis() + ".jpg";
                 String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "avatars";
                 File uploadDir = new File(uploadPath);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
-
+                
                 String targetFilePath = uploadPath + File.separator + uniqueName;
-                filePart.write(targetFilePath);
-
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFilePath)) {
+                    fos.write(imageBytes);
+                }
+                
                 try {
                     String baseRealPath = request.getServletContext().getRealPath("");
                     if (baseRealPath != null && baseRealPath.contains("target")) {
@@ -162,19 +161,81 @@ public class ProfileController extends HttpServlet {
                     }
                 } catch (Exception ignored) {
                 }
-
+                
                 avatarUrl = request.getContextPath() + "/uploads/avatars/" + uniqueName;
+            } catch (Exception ex) {
+                request.setAttribute("errorMsg", "Failed to process cropped avatar image: " + ex.getMessage());
+                request.setAttribute("user", user);
+                request.setAttribute("profile", profile);
+                request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
+                return;
             }
-        } catch (IllegalArgumentException ex) {
-            request.setAttribute("errorMsg", ex.getMessage());
-            request.setAttribute("user", user);
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
-            return;
+        } else {
+            try {
+                Part filePart = request.getPart("avatarFile");
+                if (filePart != null && filePart.getSize() > 0) {
+                    // Validate format & size (BR11)
+                    String contentType = filePart.getContentType();
+                    if (!"image/png".equalsIgnoreCase(contentType) &&
+                        !"image/jpeg".equalsIgnoreCase(contentType) &&
+                        !"image/jpg".equalsIgnoreCase(contentType)) {
+                        throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+                    }
+
+                    if (filePart.getSize() > 5242880) { // 5MB
+                        throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
+                    }
+
+                    String fileName = getSubmittedFileName(filePart);
+                    String extension = "";
+                    int dotIndex = fileName.lastIndexOf('.');
+                    if (dotIndex >= 0) {
+                        extension = fileName.substring(dotIndex);
+                    }
+
+                    String uniqueName = "avatar_" + user.getUserId() + "_" + System.currentTimeMillis() + extension;
+                    String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "avatars";
+                    File uploadDir = new File(uploadPath);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+
+                    String targetFilePath = uploadPath + File.separator + uniqueName;
+                    filePart.write(targetFilePath);
+
+                    try {
+                        String baseRealPath = request.getServletContext().getRealPath("");
+                        if (baseRealPath != null && baseRealPath.contains("target")) {
+                            String sourcePath = baseRealPath.split("target")[0] + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "uploads" + File.separator + "avatars";
+                            File sourceDir = new File(sourcePath);
+                            if (!sourceDir.exists()) {
+                                sourceDir.mkdirs();
+                            }
+                            java.nio.file.Files.copy(
+                                java.nio.file.Paths.get(targetFilePath),
+                                java.nio.file.Paths.get(sourcePath + File.separator + uniqueName),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                            );
+                        }
+                    } catch (Exception ignored) {
+                    }
+
+                    avatarUrl = request.getContextPath() + "/uploads/avatars/" + uniqueName;
+                }
+            } catch (IllegalArgumentException ex) {
+                request.setAttribute("errorMsg", ex.getMessage());
+                request.setAttribute("user", user);
+                request.setAttribute("profile", profile);
+                request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
+                return;
+            }
         }
 
         // Apply changes
         user.setPhoneNumber(phoneNumber.trim());
+        user.setFullName(fullName.trim());
+        user.setAvatarUrl(avatarUrl);
+
         profile.setFullName(fullName.trim());
         profile.setDriverLicense(driverLicense != null ? driverLicense.trim() : "");
         profile.setIdCardNo(idCardNo != null ? idCardNo.trim() : "");
@@ -193,7 +254,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "Database update failed. Please try again.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
         }
     }
 
@@ -212,7 +273,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "All password fields are required.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
@@ -221,7 +282,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "New password must be at least 8 characters.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
@@ -230,7 +291,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "New password cannot be identical to the current password.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
@@ -239,7 +300,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "New password and confirmation password do not match.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
@@ -249,7 +310,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "Current password incorrect.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
             return;
         }
 
@@ -264,7 +325,7 @@ public class ProfileController extends HttpServlet {
             request.setAttribute("errorMsg", "Failed to update password. Please try again.");
             request.setAttribute("user", user);
             request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/WEB-INF/views/common/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/common/profile.jsp").forward(request, response);
         }
     }
 
@@ -276,5 +337,19 @@ public class ProfileController extends HttpServlet {
             }
         }
         return "unknown";
+    }
+
+    private String getValueFromPart(Part part) throws IOException {
+        if (part == null) return null;
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(part.getInputStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+            StringBuilder value = new StringBuilder();
+            char[] buffer = new char[1024];
+            int length;
+            while ((length = reader.read(buffer)) > 0) {
+                value.append(buffer, 0, length);
+            }
+            return value.toString();
+        }
     }
 }

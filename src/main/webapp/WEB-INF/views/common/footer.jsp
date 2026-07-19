@@ -31,7 +31,7 @@
         </div>
         <div style="border-top:1px solid #E5E7EB; padding-top:1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#9CA3AF;">
             <span>&copy; 2026 CarRental Platform. All rights reserved.</span>
-            <span>Made with ❤️ in Vietnam</span>
+            <span>Made with <i class="bi bi-heart-fill" style="color:var(--color-red);"></i> in Vietnam</span>
         </div>
     </div>
 </footer>

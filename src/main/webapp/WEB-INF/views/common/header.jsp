@@ -15,9 +15,17 @@
                 <li><a href="${pageContext.request.contextPath}/admin/users" class="nav-link"><i class="bi bi-person-lines-fill"></i> Manage Users</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/revenue" class="nav-link"><i class="bi bi-bar-chart-line-fill"></i> Revenue</a></li>
                 <li class="navbar-divider"></li>
-                <li><span class="nav-link" style="color:var(--text-muted); cursor:default; font-size:0.8rem;">
-                    <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/>
-                </span></li>
+                <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user.avatarUrl}">
+                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                        </c:when>
+                        <c:otherwise>
+                            <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
+                        </c:otherwise>
+                    </c:choose>
+                    <span><c:out value="${not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.email}"/></span>
+                </a></li>
                 <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-ghost btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
             </ul>
         </c:when>
@@ -32,9 +40,17 @@
                 <li><a href="${pageContext.request.contextPath}/staff/bookings" class="nav-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a></li>
                 <li><a href="${pageContext.request.contextPath}/staff/cars" class="nav-link"><i class="bi bi-car-front-fill"></i> Manage Cars</a></li>
                 <li class="navbar-divider"></li>
-                <li><span class="nav-link" style="color:var(--text-muted); cursor:default; font-size:0.8rem;">
-                    <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/>
-                </span></li>
+                <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user.avatarUrl}">
+                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                        </c:when>
+                        <c:otherwise>
+                            <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
+                        </c:otherwise>
+                    </c:choose>
+                    <span><c:out value="${not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.email}"/></span>
+                </a></li>
                 <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-ghost btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
             </ul>
         </c:when>
@@ -50,8 +66,16 @@
                 <li><a href="${pageContext.request.contextPath}/owner/orders" class="nav-link"><i class="bi bi-receipt-cutoff"></i> Rental Orders</a></li>
                 <li><a href="${pageContext.request.contextPath}/owner/earning" class="nav-link"><i class="bi bi-wallet2"></i> Earnings</a></li>
                 <li class="navbar-divider"></li>
-                <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="color:var(--text-muted);">
-                    <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.email}"/>
+                <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user.avatarUrl}">
+                            <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                        </c:when>
+                        <c:otherwise>
+                            <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
+                        </c:otherwise>
+                    </c:choose>
+                    <span><c:out value="${not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.email}"/></span>
                 </a></li>
                 <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-ghost btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
             </ul>
@@ -70,8 +94,16 @@
                         <li><a href="${pageContext.request.contextPath}/customer/bookings" class="nav-link"><i class="bi bi-calendar2-check"></i> My Bookings</a></li>
                         <li><a href="${pageContext.request.contextPath}/feedbacks" class="nav-link"><i class="bi bi-star-fill"></i> My Reviews</a></li>
                         <li class="navbar-divider"></li>
-                        <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="color:var(--text-muted);">
-                            <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.fullName != null ? sessionScope.user.fullName : sessionScope.user.email}"/>
+                        <li><a href="${pageContext.request.contextPath}/profile" class="nav-link" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-muted);">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.user.avatarUrl}">
+                                    <img src="${sessionScope.user.avatarUrl}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 1.5px solid var(--orange);" alt="Avatar" />
+                                </c:when>
+                                <c:otherwise>
+                                    <i class="bi bi-person-circle" style="font-size:1.3rem; vertical-align:middle;"></i>
+                                </c:otherwise>
+                            </c:choose>
+                            <span><c:out value="${not empty sessionScope.user.fullName ? sessionScope.user.fullName : sessionScope.user.email}"/></span>
                         </a></li>
                         <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-ghost btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                     </c:when>

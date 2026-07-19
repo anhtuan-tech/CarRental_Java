@@ -81,6 +81,9 @@ public class CarBookingController extends HttpServlet {
         }
 
         switch (action) {
+            case "pay":
+                handleCustomerPay(request, response, user);
+                break;
             case "search":
                 handleCustomerSearchBookings(request, response, user);
                 break;
@@ -175,6 +178,31 @@ public class CarBookingController extends HttpServlet {
         request.setAttribute("keywordVal", keyword);
 
         request.getRequestDispatcher("/WEB-INF/views/customer/bookingPage.jsp").forward(request, response);
+    }
+
+    private void handleCustomerPay(HttpServletRequest request, HttpServletResponse response, User user)
+            throws ServletException, IOException {
+        String bookingIdStr = request.getParameter("bookingId");
+        int bookingId = -1;
+        try {
+            if (bookingIdStr != null) {
+                bookingId = Integer.parseInt(bookingIdStr.trim());
+            }
+        } catch (NumberFormatException e) {
+            logger.log(Level.WARNING, "Invalid bookingId for pay action: {0}", bookingIdStr);
+        }
+
+        if (bookingId > 0) {
+            Booking booking = bookingDAO.getBookingById(bookingId);
+            if (booking != null && "Pending Payment".equals(booking.getStatus())) {
+                String paymentUrl = paymentService.preprocessPayment(booking.getBookingId(), booking.getSubtotalFee(), "vnpay",
+                        request.getContextPath());
+                response.sendRedirect(paymentUrl);
+                return;
+            }
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
     }
 
     // =========================================================================

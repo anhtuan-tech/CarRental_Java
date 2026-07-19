@@ -14,44 +14,7 @@
             </head>
 
             <body>
-
-                <!-- ============================================================ NAVBAR -->
-                <nav class="navbar" id="mainNavbar">
-                    <a href="${pageContext.request.contextPath}/home" class="navbar-brand">
-                        <i class="bi bi-car-front-fill" style="color:var(--orange);"></i>
-                        Car<span>Rental</span>
-                    </a>
-
-                    <ul class="navbar-nav">
-                        <li><a href="${pageContext.request.contextPath}/home" class="nav-link active">Home</a></li>
-                        <li><a href="#cars-section" class="nav-link">Our Fleet</a></li>
-
-                        <li class="navbar-divider"></li>
-
-                        <c:choose>
-                            <c:when test="${not empty sessionScope.user}">
-                                <li>
-                                    <a href="${pageContext.request.contextPath}/profile" class="nav-link"
-                                        style="color: var(--color-blue-light);">
-                                        <i class="bi bi-person-fill"></i> ${sessionScope.user.email}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="${pageContext.request.contextPath}/logout" class="btn btn-ghost btn-sm">
-                                        Logout
-                                    </a>
-                                </li>
-                            </c:when>
-                            <c:otherwise>
-                                <li><a href="${pageContext.request.contextPath}/login/customer"
-                                        class="btn btn-outline-blue btn-sm">Login</a></li>
-                                <li><a href="${pageContext.request.contextPath}/register/customer"
-                                        class="btn btn-blue btn-sm">Register</a></li>
-                            </c:otherwise>
-                        </c:choose>
-                    </ul>
-                </nav>
-
+                <jsp:include page="/WEB-INF/views/common/header.jsp" />
                 <div class="page-wrapper">
 
                     <!-- ============================================================ HERO -->
@@ -65,33 +28,22 @@
                             Hundreds of luxury models, simple booking procedure, and completely transparent pricing.
                             Rent today and enjoy the ultimate driving journey.
                         </p>
-                        <div class="hero-actions">
-                            <c:choose>
-                                <c:when test="${not empty sessionScope.user}">
-                                    <a href="#cars-section" class="btn btn-blue btn-lg">Explore Cars</a>
-                                </c:when>
-                                <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/register/customer"
-                                        class="btn btn-blue btn-lg">Get Started</a>
-                                    <a href="${pageContext.request.contextPath}/login/customer"
-                                        class="btn btn-outline-blue btn-lg">Login</a>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
+                        <c:if test="${not empty sessionScope.user}">
+                            <div class="hero-actions">
+                                <a href="${pageContext.request.contextPath}/cars" class="btn btn-blue btn-lg">Explore Cars</a>
+                            </div>
+                        </c:if>
                     </section>
 
                     <!-- ============================================================ CARS -->
                     <section class="cars-section" id="cars-section">
                         <div class="section-header">
                             <div>
-                                <h2 class="section-title">Available <span>Fleet</span></h2>
+                                <h2 class="section-title">Most Popular <span>Cars</span></h2>
                                 <div class="blue-line"></div>
                             </div>
                             <span class="text-muted text-sm">
-                                <c:choose>
-                                    <c:when test="${not empty cars}">${cars.size()} cars available</c:when>
-                                    <c:otherwise>No cars available</c:otherwise>
-                                </c:choose>
+                                Our top rented vehicles
                             </span>
                         </div>
 
@@ -122,23 +74,20 @@
                                                     <c:out value="${car.brand}" />  
                                                     <c:out value="${car.model}" />
                                                 </div>
-                                                <div class="car-card-footer">
-                                                    <div class="car-price">
-                                                        <span class="car-price-value">
-                                                            <fmt:formatNumber value="${car.pricePerDay}" type="number"
-                                                                groupingUsed="true" /> VND
-                                                        </span>
-                                                        <span class="car-price-label">/ day</span>
+                                                <div class="car-card-footer" style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">
+                                                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                                                        <div class="car-price">
+                                                            <span class="car-price-value">
+                                                                <fmt:formatNumber value="${car.pricePerDay}" type="number"
+                                                                    groupingUsed="true" /> VND
+                                                            </span>
+                                                            <span class="car-price-label">/ day</span>
+                                                        </div>
+                                                        <a href="${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}" class="btn btn-outline-blue btn-sm">Details</a>
                                                     </div>
-                                                    <c:choose>
-                                                        <c:when test="${not empty sessionScope.user}">
-                                                            <a href="#" class="btn btn-blue btn-sm">Book Now</a>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <a href="${pageContext.request.contextPath}/login/customer"
-                                                                class="btn btn-outline-blue btn-sm">Login</a>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                    <c:if test="${sessionScope.user != null && sessionScope.user.roleId == 3}">
+                                                        <a href="${pageContext.request.contextPath}/customer/booking?carId=${car.carId}" class="btn btn-blue btn-sm" style="width:100%; text-align:center;">Book Now</a>
+                                                    </c:if>
                                                 </div>
                                             </div>
                                         </div>
@@ -158,32 +107,7 @@
 
                 </div>
 
-                <!-- ============================================================ FOOTER -->
-                <footer class="site-footer">
-                    <div class="footer-inner">
-                        <div>
-                            <div class="footer-brand">Car<span>Rental</span></div>
-                            <p class="footer-desc">Vietnam's leading premium car rental platform - connecting owners and
-                                customers safely and transparently.</p>
-                        </div>
-                        <div class="footer-col">
-                            <div class="footer-col-title">For Users</div>
-                            <a href="${pageContext.request.contextPath}/login/customer">Customers</a>
-                            <a href="${pageContext.request.contextPath}/login/owner">Owners</a>
-                            <a href="${pageContext.request.contextPath}/login/staff">Staff Portal</a>
-                        </div>
-                        <div class="footer-col">
-                            <div class="footer-col-title">Support</div>
-                            <a href="#">Terms of Use</a>
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Contact Us</a>
-                        </div>
-                    </div>
-                    <div class="footer-bottom">
-                        <span>© 2026 CarRental. All rights reserved.</span>
-                        <span>Made with ❤️ in Vietnam</span>
-                    </div>
-                </footer>
+
 
                 <jsp:include page="/WEB-INF/views/common/footer.jsp" />
             </body>

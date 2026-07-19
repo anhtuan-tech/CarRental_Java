@@ -159,10 +159,7 @@
 <div class="page-wrapper">
     <div class="container mt-4">
         
-        <!-- Breadcrumbs -->
-        <div class="mb-4">
-            <a href="${pageContext.request.contextPath}/cars" style="color:var(--color-gray-light); font-size:0.9rem; font-weight:500;">← Back to Fleet</a>
-        </div>
+        
 
         <h1 class="hero-title" style="font-size: 2.25rem; margin-bottom: 0.5rem; text-align: left;">
             <c:out value="${car.carName}"/>
@@ -182,7 +179,7 @@
                             <img id="mainGalleryImg" src="${carImages[0].imageUrl}" alt="${car.carName}"/>
                         </c:when>
                         <c:otherwise>
-                            <div class="car-card-placeholder">🚘</div>
+                            <div class="car-card-placeholder"><i class="bi bi-car-front-fill" style="font-size:3rem; color:var(--color-gray-mid);"></i></div>
                         </c:otherwise>
                     </c:choose>
                 </div>
@@ -364,7 +361,7 @@
     </div>
     <div class="footer-bottom">
         <span>© 2026 CarRental. All rights reserved.</span>
-        <span>Made with ❤️ in Vietnam</span>
+        <span>Made with <i class="bi bi-heart-fill" style="color:var(--color-red);"></i> in Vietnam</span>
     </div>
 </footer>
 

@@ -145,7 +145,7 @@
                                           Vehicle Name <span class="required">*</span>
                                     </label>
                                     <div class="input-wrapper">
-                                          <span class="input-icon">🚘</span>
+                                          <span class="input-icon"><i class="bi bi-car-front-fill"></i></span>
                                           <input type="text"
                                                     id="carName"
                                                     name="carName"
@@ -161,7 +161,7 @@
                                           Brand <span class="required">*</span>
                                     </label>
                                     <div class="input-wrapper">
-                                          <span class="input-icon">🏢</span>
+                                          <span class="input-icon"><i class="bi bi-building"></i></span>
                                           <input type="text"
                                                     id="brand"
                                                     name="brand"
@@ -177,7 +177,7 @@
                                           Model Year <span class="required">*</span>
                                     </label>
                                     <div class="input-wrapper">
-                                          <span class="input-icon">📅</span>
+                                          <span class="input-icon"><i class="bi bi-calendar-event-fill"></i></span>
                                           <input type="text"
                                                     id="model"
                                                     name="model"
@@ -193,7 +193,7 @@
                                           License Plate <span class="required">*</span>
                                     </label>
                                     <div class="input-wrapper">
-                                          <span class="input-icon">🪪</span>
+                                          <span class="input-icon"><i class="bi bi-card-heading"></i></span>
                                           <input type="text"
                                                     id="licensePlate"
                                                     name="licensePlate"
@@ -238,7 +238,7 @@
                                           Registration Document URL
                                     </label>
                                     <div class="input-wrapper">
-                                          <span class="input-icon">🔗</span>
+                                          <span class="input-icon"><i class="bi bi-link-45deg"></i></span>
                                           <input type="text"
                                                     id="documentUrl"
                                                     name="documentUrl"

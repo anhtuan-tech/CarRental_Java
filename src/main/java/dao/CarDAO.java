@@ -33,6 +33,38 @@ public class CarDAO {
     }
 
     /**
+     * Retrieve top 3 most rented available cars for the homepage.
+     */
+    public List<Car> getTop3MostRentedCars() {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        List<Car> cars = new ArrayList<>();
+
+        String query = "SELECT TOP 3 c.car_id, c.owner_id, c.type_id, c.car_name, c.brand, c.model, "
+                + "c.license_plate, c.specs_json, c.price_per_day, c.status, c.document_url, "
+                + "ct.type_name, "
+                + "ISNULL(ci.image_url, '') AS primary_image_url, "
+                + "(SELECT COUNT(*) FROM Booking b WHERE b.car_id = c.car_id AND b.status IN ('Approved', 'Completed', 'Active')) AS booking_count "
+                + "FROM Car c "
+                + "LEFT JOIN CarType ct ON c.type_id = ct.type_id "
+                + "LEFT JOIN CarImage ci ON c.car_id = ci.car_id AND ci.is_primary = 1 "
+                + "WHERE c.status = 'Available' "
+                + "ORDER BY booking_count DESC, c.car_id DESC";
+        try {
+            rs = db.executeSelectQuery(query);
+            while (rs != null && rs.next()) {
+                Car car = mapRowToCar(rs);
+                cars.add(car);
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "getTop3MostRentedCars failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return cars;
+    }
+
+    /**
      * Retrieve available cars with limit/offset pagination.
      * Orders by car_id DESC (BR1, BR2).
      */

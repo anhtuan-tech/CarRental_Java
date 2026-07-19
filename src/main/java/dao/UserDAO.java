@@ -93,7 +93,7 @@ public class UserDAO {
 
         String fullNameVal = (user.getFullName() != null) ? user.getFullName().trim() : "";
         String avatarUrlVal = (user.getAvatarUrl() != null) ? user.getAvatarUrl().trim() : "";
-        String insertProfile = "INSERT INTO [Profile] (user_id, full_name, avatar_url, driver_license, id_card_no, address) "
+        String insertProfile = "INSERT INTO [Profile] (user_id, full_name, avatar_url, driver_license_no, id_card_no, address) "
                 + "VALUES (?, ?, ?, '', '', '')";
         int profileAffected = dbProfile.executeQuery(insertProfile,
                 new Object[] { newUserId, fullNameVal, avatarUrlVal });
@@ -115,7 +115,13 @@ public class UserDAO {
         if (user.getPassword() != null && !user.getPassword().trim().isEmpty()
                 && !"[PROTECTED]".equalsIgnoreCase(user.getPassword())) {
             queryUser = "UPDATE [User] SET email = ?, phone_number = ?, status = ?, password = ?, updated_at = GETDATE() WHERE user_id = ?";
-            String hashedPassword = PasswordUtils.hashSHA256(user.getPassword().trim());
+            String rawPassword = user.getPassword().trim();
+            String hashedPassword;
+            if (rawPassword.length() == 64 && rawPassword.matches("^[0-9a-fA-F]{64}$")) {
+                hashedPassword = rawPassword;
+            } else {
+                hashedPassword = PasswordUtils.hashSHA256(rawPassword);
+            }
             affectedUser = dbUser.executeQuery(queryUser, new Object[] {
                     user.getEmail(), user.getPhoneNumber(), user.getStatus(), hashedPassword, user.getUserId()
             });
@@ -155,12 +161,16 @@ public class UserDAO {
             return null;
         DBContext db = new DBContext();
         ResultSet rs = null;
-        String query = "SELECT user_id, role_id, email, password, phone_number, status, created_at, updated_at "
-                + "FROM [User] WHERE LOWER(email) = LOWER(?) AND role_id = ?";
+        String query = "SELECT u.user_id, u.role_id, u.email, u.password, u.phone_number, u.status, u.created_at, u.updated_at, "
+                + "p.full_name, p.avatar_url "
+                + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
+                + "WHERE LOWER(u.email) = LOWER(?) AND u.role_id = ?";
         try {
             rs = db.executeSelectQuery(query, new Object[] { email.trim(), roleId });
             if (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
+                user.setFullName(rs.getString("full_name"));
+                user.setAvatarUrl(rs.getString("avatar_url"));
 
                 String hashedInput = PasswordUtils.hashSHA256(password);
                 String dbPwd = user.getPassword();
@@ -191,12 +201,16 @@ public class UserDAO {
             return null;
         DBContext db = new DBContext();
         ResultSet rs = null;
-        String query = "SELECT user_id, role_id, email, password, phone_number, status, created_at, updated_at "
-                + "FROM [User] WHERE LOWER(email) = LOWER(?) AND role_id IN (1, 2)";
+        String query = "SELECT u.user_id, u.role_id, u.email, u.password, u.phone_number, u.status, u.created_at, u.updated_at, "
+                + "p.full_name, p.avatar_url "
+                + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
+                + "WHERE LOWER(u.email) = LOWER(?) AND u.role_id IN (1, 2)";
         try {
             rs = db.executeSelectQuery(query, new Object[] { email.trim() });
             if (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
+                user.setFullName(rs.getString("full_name"));
+                user.setAvatarUrl(rs.getString("avatar_url"));
 
                 String hashedInput = PasswordUtils.hashSHA256(password);
                 String dbPwd = user.getPassword();
@@ -285,7 +299,7 @@ public class UserDAO {
     public Profile getProfileByUserId(int userId) {
         DBContext db = new DBContext();
         ResultSet rs = null;
-        String query = "SELECT profile_id, user_id, full_name, avatar_url, driver_license, id_card_no, address "
+        String query = "SELECT profile_id, user_id, full_name, avatar_url, driver_license_no, id_card_no, address "
                 + "FROM [Profile] WHERE user_id = ?";
         try {
             rs = db.executeSelectQuery(query, new Object[] { userId });
@@ -295,7 +309,7 @@ public class UserDAO {
                 p.setUserId(rs.getInt("user_id"));
                 p.setFullName(rs.getString("full_name"));
                 p.setAvatarUrl(rs.getString("avatar_url"));
-                p.setDriverLicense(rs.getString("driver_license"));
+                p.setDriverLicense(rs.getString("driver_license_no"));
                 p.setIdCardNo(rs.getString("id_card_no"));
                 p.setAddress(rs.getString("address"));
                 return p;
@@ -308,9 +322,24 @@ public class UserDAO {
         return null;
     }
 
+    public boolean createProfile(Profile profile) {
+        DBContext db = new DBContext();
+        String query = "INSERT INTO [Profile] (user_id, full_name, avatar_url, driver_license_no, id_card_no, address) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        int affected = db.executeQuery(query, new Object[] {
+                profile.getUserId(),
+                profile.getFullName() != null ? profile.getFullName() : "",
+                profile.getAvatarUrl() != null ? profile.getAvatarUrl() : "",
+                profile.getDriverLicense() != null ? profile.getDriverLicense() : "",
+                profile.getIdCardNo() != null ? profile.getIdCardNo() : "",
+                profile.getAddress() != null ? profile.getAddress() : ""
+        });
+        return affected > 0;
+    }
+
     public boolean updateProfile(Profile profile) {
         DBContext db = new DBContext();
-        String query = "UPDATE [Profile] SET full_name = ?, avatar_url = ?, driver_license = ?, id_card_no = ?, address = ? WHERE user_id = ?";
+        String query = "UPDATE [Profile] SET full_name = ?, avatar_url = ?, driver_license_no = ?, id_card_no = ?, address = ? WHERE user_id = ?";
         int affected = db.executeQuery(query, new Object[] {
                 profile.getFullName() != null ? profile.getFullName() : "",
                 profile.getAvatarUrl() != null ? profile.getAvatarUrl() : "",
@@ -330,7 +359,7 @@ public class UserDAO {
         DBContext db = new DBContext();
         ResultSet rs = null;
         String query = "SELECT u.user_id, u.role_id, u.email, u.password, u.phone_number, u.status, u.created_at, u.updated_at, "
-                + "p.full_name, p.avatar_url, p.driver_license, p.id_card_no, p.address "
+                + "p.full_name, p.avatar_url "
                 + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
                 + "WHERE u.user_id = ?";
         try {
@@ -338,6 +367,7 @@ public class UserDAO {
             if (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
                 user.setFullName(rs.getString("full_name"));
+                user.setAvatarUrl(rs.getString("avatar_url"));
                 return user;
             }
         } catch (SQLException ex) {

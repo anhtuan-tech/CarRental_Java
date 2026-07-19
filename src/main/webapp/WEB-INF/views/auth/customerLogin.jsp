@@ -21,19 +21,19 @@
         </p>
         <div class="auth-features">
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">🔒</div>
+                <div class="auth-feature-icon"><i class="bi bi-shield-lock-fill"></i></div>
                 <span>Secure multi-layer account protection</span>
             </div>
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">⚡</div>
+                <div class="auth-feature-icon"><i class="bi bi-lightning-charge-fill"></i></div>
                 <span>Book a car in under 60 seconds</span>
             </div>
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">💳</div>
+                <div class="auth-feature-icon"><i class="bi bi-credit-card-2-front-fill"></i></div>
                 <span>VNPAY secure online payment</span>
             </div>
             <div class="auth-feature-item">
-                <div class="auth-feature-icon">💎</div>
+                <div class="auth-feature-icon"><i class="bi bi-gem"></i></div>
                 <span>5-star premium experience</span>
             </div>
         </div>
