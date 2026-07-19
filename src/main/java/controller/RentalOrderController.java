@@ -131,11 +131,11 @@ public class RentalOrderController extends HttpServlet {
         current = current.trim();
         target = target.trim();
 
-        if ("Pending".equalsIgnoreCase(current)) {
-            return "Confirmed".equalsIgnoreCase(target) || "Rejected".equalsIgnoreCase(target);
+        if ("Pending".equalsIgnoreCase(current) || "Paid".equalsIgnoreCase(current) || "Approved".equalsIgnoreCase(current)) {
+            return "Confirmed".equalsIgnoreCase(target) || "Active".equalsIgnoreCase(target) || "Completed".equalsIgnoreCase(target) || "Rejected".equalsIgnoreCase(target);
         }
         if ("Confirmed".equalsIgnoreCase(current)) {
-            return "Active".equalsIgnoreCase(target);
+            return "Active".equalsIgnoreCase(target) || "Completed".equalsIgnoreCase(target);
         }
         if ("Active".equalsIgnoreCase(current)) {
             return "Completed".equalsIgnoreCase(target);

@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="Renting details of ${car.carName}."/>
     <title>${car.carName} - Details - CarRental</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1"/>
     <style>
         /* Details specific layouts */
         .detail-grid {

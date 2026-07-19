@@ -36,11 +36,13 @@ public class BookingDAO {
         String query = "SELECT b.booking_id, b.customer_id, b.car_id, b.start_date, b.end_date, "
                 + "b.total_days, b.subtotal_fee, b.platform_commission, b.owner_payout, b.status, b.created_at, "
                 + "c.car_name, c.brand, c.license_plate, c.price_per_day, c.owner_id, "
-                + "p.full_name AS customer_name, op.full_name AS owner_name "
+                + "p.full_name AS customer_name, op.full_name AS owner_name, "
+                + "CASE WHEN f.feedback_id IS NOT NULL THEN 1 ELSE 0 END AS is_reviewed "
                 + "FROM Booking b "
                 + "JOIN Car c ON b.car_id = c.car_id "
                 + "JOIN Profile p ON b.customer_id = p.user_id "
                 + "LEFT JOIN Profile op ON c.owner_id = op.user_id "
+                + "LEFT JOIN Feedback f ON b.booking_id = f.booking_id "
                 + "WHERE b.customer_id = ? "
                 + "ORDER BY b.created_at DESC";
         try {
@@ -354,6 +356,9 @@ public class BookingDAO {
         booking.setOwnerId(rs.getInt("owner_id"));
         booking.setCustomerName(rs.getString("customer_name"));
         booking.setOwnerName(rs.getString("owner_name"));
+        try {
+            booking.setReviewed(rs.getInt("is_reviewed") == 1);
+        } catch (SQLException ignored) {}
         return booking;
     }
 }

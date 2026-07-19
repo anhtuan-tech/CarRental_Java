@@ -10,7 +10,7 @@
                 <meta name="description"
                     content="CarRental - Nền tảng thuê xe cao cấp hàng đầu Việt Nam. Khám phá hàng trăm mẫu xe sang trọng." />
                 <title>CarRental - Thuê Xe Cao Cấp</title>
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
             </head>
 
             <body>

@@ -8,12 +8,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer Reviews - CarRental Owner</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+    <title>Customer Reviews — CarRental Owner</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
     <style>
-        .owner-feedback-container {
-            max-width: 950px;
-            margin: var(--space-8) auto;
+        .admin-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 var(--space-4);
         }
 
         .feedback-card {
@@ -97,10 +98,32 @@
 
     <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
-    <div class="page-wrapper">
-        <div class="container">
+    <div class="mgmt-wrapper">
+        <!-- Sidebar Management Bar -->
+        <aside class="mgmt-sidebar">
+            <div class="mgmt-sidebar-header">
+                <div class="mgmt-sidebar-title"><i class="bi bi-key-fill"></i> Owner Hub</div>
+                <div class="mgmt-sidebar-subtitle">Fleet Management</div>
+            </div>
+            <ul class="mgmt-menu">
+                <div class="mgmt-menu-section-title">Overview</div>
+                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <div class="mgmt-menu-section-title">My Fleet</div>
+                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/cars"><i class="bi bi-car-front-fill"></i> My Vehicles</a></li>
+                <div class="mgmt-menu-section-title">Business</div>
+                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/orders"><i class="bi bi-receipt-cutoff"></i> Rental Orders</a></li>
+                <li class="mgmt-menu-item active"><a href="${pageContext.request.contextPath}/owner/feedbacks"><i class="bi bi-star-fill"></i> Customer Reviews</a></li>
+                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/earning"><i class="bi bi-wallet2"></i> Earnings &amp; Payouts</a></li>
+            </ul>
+            <div class="mgmt-sidebar-footer">
+                <div class="mgmt-user-info"><i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/></div>
+                <a href="${pageContext.request.contextPath}/logout" style="display:block; margin-top:0.5rem; font-size:0.8rem; color:#EF4444; text-decoration:none;"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </aside>
 
-            <div class="owner-feedback-container">
+        <!-- Main Content Section -->
+        <main class="mgmt-content">
+            <div class="admin-container">
 
                 <div class="mb-6">
                     <h1 class="hero-title" style="font-size: 2rem; margin-bottom: 0.5rem; text-align: left;">
@@ -108,7 +131,6 @@
                     </h1>
                     <p class="text-muted text-sm">View customer feedback for your fleet and manage owner responses.</p>
                 </div>
-                <div class="orange-line" style="height: 3px; background: var(--orange); width: 80px; margin-bottom: 2rem; border-radius: 2px;"></div>
 
                 <c:choose>
                     <c:when test="${not empty feedbacks}">
@@ -197,8 +219,7 @@
                 </c:choose>
 
             </div>
-
-        </div>
+        </main>
     </div>
 
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />

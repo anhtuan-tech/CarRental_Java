@@ -7,7 +7,7 @@
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Provision Staff - CarRental Admin</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
             <style>
                 .form-card {
                     background: var(--color-dark-card);

@@ -7,7 +7,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Car Detail - CarRental Staff</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1"/>
     <style>
         .detail-card {
             background: var(--color-dark-card);
@@ -155,7 +155,8 @@
                         <!-- Raw JSON stored for JS to parse -->
                         <script type="application/json" id="specsData">${carDetail.specsJson}</script>
                         <div id="specsGrid" class="info-grid" style="margin-bottom:0; margin-top:0.5rem;"></div>
-                    </div>                    <!-- Verification status mutation workflows -->
+                    </div>
+                    <!-- Verification status mutation workflows -->
                     <div style="background:var(--color-dark-surface); border:1px solid var(--color-dark-border); border-radius:var(--radius-xl); padding:var(--space-6); margin-top:2rem;">
                         <h3 style="color:var(--color-white); font-size:1.1rem; margin-bottom:var(--space-2);">Process Application</h3>
                         <p class="text-xs text-muted" style="margin-bottom:var(--space-4);">Evaluate documentation and set approval resolution state.</p>

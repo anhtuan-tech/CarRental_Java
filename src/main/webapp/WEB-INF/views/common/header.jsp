@@ -4,7 +4,7 @@
 <nav class="navbar">
     <c:choose>
 
-        <%-- ADMIN --%>
+        <%-- ADMIN (Role 1) --%>
         <c:when test="${sessionScope.user != null && sessionScope.user.roleId == 1}">
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="navbar-brand">
                 <i class="bi bi-shield-fill" style="color:var(--orange);"></i> Admin<span>Portal</span>
@@ -30,7 +30,7 @@
             </ul>
         </c:when>
 
-        <%-- STAFF --%>
+        <%-- STAFF (Role 2) --%>
         <c:when test="${sessionScope.user != null && sessionScope.user.roleId == 2}">
             <a href="${pageContext.request.contextPath}/staff/dashboard" class="navbar-brand">
                 <i class="bi bi-clipboard2-check-fill" style="color:var(--orange);"></i> Staff<span>Desk</span>
@@ -55,8 +55,8 @@
             </ul>
         </c:when>
 
-        <%-- OWNER --%>
-        <c:when test="${sessionScope.user != null && (sessionScope.user.roleId == 3 || sessionScope.user.roleId == 4)}">
+        <%-- OWNER (Role 4) --%>
+        <c:when test="${sessionScope.user != null && sessionScope.user.roleId == 4}">
             <a href="${pageContext.request.contextPath}/owner/dashboard" class="navbar-brand">
                 <i class="bi bi-key-fill" style="color:var(--orange);"></i> Owner<span>Hub</span>
             </a>
@@ -82,7 +82,7 @@
             </ul>
         </c:when>
 
-        <%-- CUSTOMER & GUEST --%>
+        <%-- CUSTOMER & GUEST (Role 3 or Guest) --%>
         <c:otherwise>
             <a href="${pageContext.request.contextPath}/home" class="navbar-brand">
                 <i class="bi bi-car-front-fill" style="color:var(--orange);"></i> Car<span>Rental</span>

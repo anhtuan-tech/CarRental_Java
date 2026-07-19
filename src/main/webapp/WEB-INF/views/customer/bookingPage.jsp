@@ -9,7 +9,7 @@
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <title>My Car Bookings - CarRental</title>
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
                 <style>
                     .bookings-container {
                         max-width: 1100px;
@@ -298,10 +298,19 @@
                                                 </span>
                                                 
                                                 <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
-                                                    <c:if test="${booking.status == 'Completed' || booking.status == 'Approved'}">
-                                                        <a href="${pageContext.request.contextPath}/feedback?action=create&carId=${booking.carId}" class="btn btn-primary" style="background: var(--orange); border-color: var(--orange); font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-md); text-decoration: none;">
-                                                            <i class="bi bi-star-fill"></i> Rate & Review
-                                                        </a>
+                                                    <c:if test="${booking.status == 'Completed'}">
+                                                        <c:choose>
+                                                            <c:when test="${booking.reviewed}">
+                                                                <span class="btn btn-ghost btn-sm" style="opacity: 0.55; cursor: not-allowed; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-md); border: 1px solid var(--color-dark-border); color: var(--color-gray-light);">
+                                                                    <i class="bi bi-check-circle-fill" style="color: var(--color-gray-mid); margin-right: 0.2rem;"></i> Reviewed
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <a href="${pageContext.request.contextPath}/feedback?action=create&carId=${booking.carId}" class="btn btn-primary" style="background: var(--orange); border-color: var(--orange); font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-md); text-decoration: none;">
+                                                                    <i class="bi bi-star-fill"></i> Rate & Review
+                                                                </a>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </c:if>
                                                     <c:if test="${booking.status == 'Pending Payment'}">
                                                         <a href="${pageContext.request.contextPath}/customer/bookings?action=pay&bookingId=${booking.bookingId}" class="btn btn-primary" style="background: var(--orange); border-color: var(--orange); font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-md);">

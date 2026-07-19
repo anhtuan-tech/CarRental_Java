@@ -9,7 +9,7 @@
             <meta name="description"
                 content="Register an Owner account on CarRental to start earning from your vehicle fleet." />
             <title>Owner Registration - CarRental</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
         </head>
 
         <body>

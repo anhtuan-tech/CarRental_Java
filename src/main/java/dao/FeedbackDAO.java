@@ -184,7 +184,7 @@ public class FeedbackDAO {
         ResultSet rs = null;
         String query = "SELECT TOP 1 b.booking_id "
                 + "FROM Booking b "
-                + "WHERE b.car_id = ? AND b.customer_id = ? AND b.status IN ('Completed', 'Approved') "
+                + "WHERE b.car_id = ? AND b.customer_id = ? AND b.status IN ('Completed') "
                 + "AND b.booking_id NOT IN (SELECT f.booking_id FROM Feedback f) "
                 + "ORDER BY b.created_at DESC";
         try {

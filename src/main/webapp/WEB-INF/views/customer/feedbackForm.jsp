@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +6,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Submit Feedback - CarRental</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1"/>
     <style>
         .feedback-form-card {
             background: var(--color-dark-card);
@@ -33,7 +33,8 @@
         }
         .rating-star-btn:hover,
         .rating-star-btn.active {
-            color: var(--color-blue-light);
+            color: var(--orange);
+            transform: scale(1.15);
         }
     </style>
 </head>
@@ -63,7 +64,9 @@
                     <label class="form-label">Rating Score <span class="required">*</span></label>
                     <div class="rating-stars-input">
                         <c:forEach begin="1" end="5" var="i">
-                            <button type="button" class="rating-star-btn" data-value="${i}" onclick="setRatingValue(${i})" aria-label="Rate ${i} stars">â˜…</button>
+                            <button type="button" class="rating-star-btn ${i <= requestScope.ratingVal ? 'active' : ''}" data-value="${i}" onclick="setRatingValue(${i})" aria-label="Rate ${i} stars">
+                                <i class="bi bi-star-fill"></i>
+                            </button>
                         </c:forEach>
                     </div>
                 </div>

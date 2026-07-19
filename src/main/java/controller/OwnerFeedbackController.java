@@ -31,7 +31,7 @@ public class OwnerFeedbackController extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        if (user.getRoleId() != 3) { // Role 3 = Owner
+        if (user.getRoleId() != 3 && user.getRoleId() != 4) { // Role 3 or 4 = Owner
             response.sendRedirect(request.getContextPath() + "/login/owner");
             return;
         }
@@ -55,7 +55,7 @@ public class OwnerFeedbackController extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        if (user.getRoleId() != 3) {
+        if (user.getRoleId() != 3 && user.getRoleId() != 4) {
             response.sendRedirect(request.getContextPath() + "/login/owner");
             return;
         }

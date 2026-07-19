@@ -8,7 +8,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Fleet — CarRental</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
     <style>
         .admin-container {
             max-width: 100%;
@@ -97,9 +97,8 @@
                 <li class="mgmt-menu-item active"><a href="${pageContext.request.contextPath}/owner/cars"><i class="bi bi-car-front-fill"></i> My Vehicles</a></li>
                 <div class="mgmt-menu-section-title">Business</div>
                 <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/orders"><i class="bi bi-receipt-cutoff"></i> Rental Orders</a></li>
+                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/feedbacks"><i class="bi bi-star-fill"></i> Customer Reviews</a></li>
                 <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/earning"><i class="bi bi-wallet2"></i> Earnings &amp; Payouts</a></li>
-                <div class="mgmt-menu-section-title">Account</div>
-                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/profile"><i class="bi bi-gear-fill"></i> My Profile</a></li>
             </ul>
             <div class="mgmt-sidebar-footer">
                 <div class="mgmt-user-info"><i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/></div>
