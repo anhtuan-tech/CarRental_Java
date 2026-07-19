@@ -213,7 +213,7 @@
                                                         <div class="grid-col col-avatar">
                                                             <c:choose>
                                                                 <c:when test="${not empty item.avatarUrl}">
-                                                                    <img src="${item.avatarUrl}"
+                                                                    <img src="${fn:startsWith(item.avatarUrl, 'http') || fn:startsWith(item.avatarUrl, pageContext.request.contextPath) ? item.avatarUrl : pageContext.request.contextPath.concat(item.avatarUrl)}"
                                                                         style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--orange-border);"
                                                                         alt="Avatar" />
                                                                 </c:when>

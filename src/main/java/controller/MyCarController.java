@@ -106,8 +106,24 @@ public class MyCarController extends HttpServlet {
             String[] parts = base64Data.split(",");
             String imageString = parts.length > 1 ? parts[1] : parts[0];
             byte[] imageBytes = java.util.Base64.getDecoder().decode(imageString);
+            String carIdStr = request.getParameter("carId");
+            int carId = 0;
+            try {
+                if (carIdStr != null && !carIdStr.trim().isEmpty()) {
+                    carId = Integer.parseInt(carIdStr.trim());
+                }
+            } catch (Exception ignored) {}
 
-            String fileName = "car_" + java.util.UUID.randomUUID().toString() + ".jpg";
+            User user = (User) request.getSession().getAttribute("user");
+            int ownerId = user != null ? user.getUserId() : 0;
+
+            String fileName;
+            if (carId > 0) {
+                fileName = "car_" + carId + ".jpg";
+            } else {
+                fileName = "car_temp_" + ownerId + "_" + System.currentTimeMillis() + ".jpg";
+            }
+
             String relativeUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, fileName, "cars", request);
             response.getWriter().write("{\"success\":true,\"imageUrl\":\"" + relativeUrl + "\"}");
 
@@ -225,7 +241,7 @@ public class MyCarController extends HttpServlet {
         car.setPrimaryImageUrl(primaryImageUrl != null ? primaryImageUrl.trim() : "");
         car.setSpecsJson(specsJson != null ? specsJson.trim() : "");
 
-        boolean success = carDAO.insertCar(car);
+        boolean success = carDAO.insertCar(car, request);
 
         if (success) {
             request.getSession(true).setAttribute("toastSuccessMsg", "Registration successful. Pending approval.");

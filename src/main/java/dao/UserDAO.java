@@ -133,7 +133,7 @@ public class UserDAO {
         }
 
         String queryProfile;
-        int affectedProfile;
+        int affectedProfile = 0;
         if (user.getAvatarUrl() != null && !user.getAvatarUrl().trim().isEmpty()) {
             queryProfile = "UPDATE [Profile] SET full_name = ?, avatar_url = ? WHERE user_id = ?";
             affectedProfile = dbProfile.executeQuery(queryProfile, new Object[] {
@@ -149,7 +149,16 @@ public class UserDAO {
             });
         }
 
-        return affectedUser > 0 && affectedProfile > 0;
+        if (affectedProfile == 0) {
+            String queryInsertProfile = "INSERT INTO [Profile] (user_id, full_name, avatar_url) VALUES (?, ?, ?)";
+            affectedProfile = dbProfile.executeQuery(queryInsertProfile, new Object[] {
+                    user.getUserId(),
+                    user.getFullName() != null ? user.getFullName().trim() : "",
+                    user.getAvatarUrl() != null ? user.getAvatarUrl().trim() : ""
+            });
+        }
+
+        return affectedUser > 0;
     }
 
     // =========================================================================

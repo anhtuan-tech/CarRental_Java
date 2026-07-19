@@ -408,6 +408,10 @@ public class CarDAO {
      * Register a new vehicle. Default status is 'Pending_Approval' (BR42, BR44).
      */
     public boolean insertCar(Car car) {
+        return insertCar(car, null);
+    }
+
+    public boolean insertCar(Car car, jakarta.servlet.http.HttpServletRequest request) {
         DBContext db = new DBContext();
         String query = "INSERT INTO Car (owner_id, type_id, car_name, brand, model, license_plate, specs_json, price_per_day, status, document_url) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending_Approval', ?); SELECT SCOPE_IDENTITY() AS new_id;";
@@ -439,10 +443,17 @@ public class CarDAO {
                     car.setCarId(carId);
                     
                     if (car.getPrimaryImageUrl() != null && !car.getPrimaryImageUrl().trim().isEmpty()) {
+                        String finalImgUrl = car.getPrimaryImageUrl();
+                        if (finalImgUrl.contains("temp_")) {
+                            String newFileName = "car_" + carId + ".jpg";
+                            finalImgUrl = utils.FileUploadUtil.renameUploadedFile(finalImgUrl, newFileName, "cars", request);
+                            car.setPrimaryImageUrl(finalImgUrl);
+                        }
+
                         String imgQuery = "INSERT INTO CarImage (car_id, image_url, is_primary) VALUES (?, ?, 1)";
                         try (java.sql.PreparedStatement stImg = conn.prepareStatement(imgQuery)) {
                             stImg.setInt(1, carId);
-                            stImg.setString(2, car.getPrimaryImageUrl());
+                            stImg.setString(2, finalImgUrl);
                             stImg.executeUpdate();
                         }
                     }

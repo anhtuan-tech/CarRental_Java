@@ -308,21 +308,31 @@ public class AdminController extends HttpServlet {
             staff.setPassword("[PROTECTED]");
         }
 
+        String croppedAvatarBase64 = request.getParameter("croppedAvatarBase64");
         String avatarUrl = "";
         try {
-            jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
-            if (filePart != null && filePart.getSize() > 0) {
-                String contentType = filePart.getContentType();
-                if (!"image/png".equalsIgnoreCase(contentType) &&
-                        !"image/jpeg".equalsIgnoreCase(contentType) &&
-                        !"image/jpg".equalsIgnoreCase(contentType)) {
-                    throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
-                }
-                if (filePart.getSize() > 5242880) { // 5MB
-                    throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
-                }
-                avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff_" + staffId);
+            if (croppedAvatarBase64 != null && !croppedAvatarBase64.trim().isEmpty()) {
+                String[] parts = croppedAvatarBase64.split(",");
+                String base64Data = parts.length > 1 ? parts[1] : parts[0];
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data.trim());
+                String avatarFileName = "avatar_staff_" + staffId + ".jpg";
+                avatarUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, avatarFileName, "avatars", request);
                 staff.setAvatarUrl(avatarUrl);
+            } else {
+                jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
+                if (filePart != null && filePart.getSize() > 0) {
+                    String contentType = filePart.getContentType();
+                    if (!"image/png".equalsIgnoreCase(contentType) &&
+                            !"image/jpeg".equalsIgnoreCase(contentType) &&
+                            !"image/jpg".equalsIgnoreCase(contentType)) {
+                        throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+                    }
+                    if (filePart.getSize() > 5242880) { // 5MB
+                        throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
+                    }
+                    avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff_" + staffId);
+                    staff.setAvatarUrl(avatarUrl);
+                }
             }
         } catch (Exception ex) {
             request.getSession(true).setAttribute("toastErrorMsg",
@@ -596,7 +606,9 @@ public class AdminController extends HttpServlet {
      */
     private String saveUploadedAvatar(HttpServletRequest request,
             jakarta.servlet.http.Part filePart, String prefix) throws Exception {
-        return utils.FileUploadUtil.saveUploadedFile(filePart, "avatars", request);
+        String avatarFileName = prefix + ".jpg";
+        byte[] fileBytes = filePart.getInputStream().readAllBytes();
+        return utils.FileUploadUtil.saveByteArrayFile(fileBytes, avatarFileName, "avatars", request);
     }
 
     /**

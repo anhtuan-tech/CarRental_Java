@@ -191,10 +191,10 @@
                                                   
                                                   <!-- Round Avatar -->
                                                   <div class="grid-col col-avatar">
-                                                      <c:choose>
-                                                          <c:when test="${not empty staff.avatarUrl}">
-                                                              <img src="${staff.avatarUrl}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--orange-border);" alt="Avatar" />
-                                                          </c:when>
+                                                       <c:choose>
+                                                           <c:when test="${not empty staff.avatarUrl}">
+                                                               <img src="${fn:startsWith(staff.avatarUrl, 'http') || fn:startsWith(staff.avatarUrl, pageContext.request.contextPath) ? staff.avatarUrl : pageContext.request.contextPath.concat(staff.avatarUrl)}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--orange-border);" alt="Avatar" />
+                                                           </c:when>
                                                           <c:otherwise>
                                                               <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--orange-pale); border: 2px solid var(--orange-border); display: flex; align-items: center; justify-content: center; color: var(--orange-dark); font-weight: 700; font-size: 1rem;">
                                                                   <c:out value="${fn:substring(staff.fullName, 0, 1)}"/>

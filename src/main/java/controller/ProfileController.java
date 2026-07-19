@@ -133,8 +133,8 @@ public class ProfileController extends HttpServlet {
                 String base64Data = parts.length > 1 ? parts[1] : parts[0];
                 byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data.trim());
                 
-                String uniqueName = "avatar_cropped_" + user.getUserId() + "_" + System.currentTimeMillis() + ".jpg";
-                avatarUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, uniqueName, "avatars", request);
+                String avatarFileName = "avatar_" + user.getUserId() + ".jpg";
+                avatarUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, avatarFileName, "avatars", request);
             } catch (Exception ex) {
                 request.setAttribute("errorMsg", "Failed to process cropped avatar image: " + ex.getMessage());
                 request.setAttribute("user", user);
@@ -158,7 +158,9 @@ public class ProfileController extends HttpServlet {
                         throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
                     }
 
-                    avatarUrl = utils.FileUploadUtil.saveUploadedFile(filePart, "avatars", request);
+                    String avatarFileName = "avatar_" + user.getUserId() + ".jpg";
+                    byte[] fileBytes = filePart.getInputStream().readAllBytes();
+                    avatarUrl = utils.FileUploadUtil.saveByteArrayFile(fileBytes, avatarFileName, "avatars", request);
                 }
             } catch (IllegalArgumentException ex) {
                 request.setAttribute("errorMsg", ex.getMessage());
