@@ -164,7 +164,7 @@
                                     <div>
                                         <c:choose>
                                             <c:when test="${not empty car.primaryImageUrl}">
-                                                <img src="${car.primaryImageUrl}" class="car-thumb" alt="${car.carName}" />
+                                                <img src="${pageContext.request.contextPath}${car.primaryImageUrl}" class="car-thumb" alt="${car.carName}" />
                                             </c:when>
                                             <c:otherwise>
                                                 <div class="car-thumb"><i class="bi bi-car-front" style="color:var(--color-gray-light);"></i></div>

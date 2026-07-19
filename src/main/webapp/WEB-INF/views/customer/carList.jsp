@@ -135,7 +135,7 @@
                             <div class="car-card-image">
                                 <c:choose>
                                     <c:when test="${not empty car.primaryImageUrl}">
-                                        <img src="${car.primaryImageUrl}" alt="${car.carName}" loading="lazy"/>
+                                        <img src="${pageContext.request.contextPath}${car.primaryImageUrl}" alt="${car.carName}" loading="lazy"/>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="car-card-placeholder"><i class="bi bi-car-front-fill" style="font-size:2rem; color:var(--color-gray-mid);"></i></div>

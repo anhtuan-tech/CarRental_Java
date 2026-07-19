@@ -176,7 +176,7 @@
                 <div class="gallery-main">
                     <c:choose>
                         <c:when test="${not empty carImages}">
-                            <img id="mainGalleryImg" src="${carImages[0].imageUrl}" alt="${car.carName}"/>
+                            <img id="mainGalleryImg" src="${pageContext.request.contextPath}${carImages[0].imageUrl}" alt="${car.carName}"/>
                         </c:when>
                         <c:otherwise>
                             <div class="car-card-placeholder"><i class="bi bi-car-front-fill" style="font-size:3rem; color:var(--color-gray-mid);"></i></div>
@@ -187,8 +187,8 @@
                 <c:if test="${not empty carImages and carImages.size() > 1}">
                     <div class="gallery-thumbs">
                         <c:forEach var="img" items="${carImages}" varStatus="status">
-                            <div class="thumb-item ${status.index == 0 ? 'active' : ''}" onclick="swapGalleryImage(this, '${img.imageUrl}')">
-                                <img src="${img.imageUrl}" alt="Thumbnail ${status.index}"/>
+                            <div class="thumb-item ${status.index == 0 ? 'active' : ''}" onclick="swapGalleryImage(this, '${pageContext.request.contextPath}${img.imageUrl}')">
+                                <img src="${pageContext.request.contextPath}${img.imageUrl}" alt="Thumbnail ${status.index}"/>
                             </div>
                         </c:forEach>
                     </div>

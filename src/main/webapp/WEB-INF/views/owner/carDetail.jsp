@@ -290,7 +290,7 @@
                                         <c:choose>
                                             <c:when test="${not empty car.primaryImageUrl}">
                                                 <div class="car-image-banner" style="margin-bottom:0;">
-                                                    <img id="displayCarImg" src="${car.primaryImageUrl}"
+                                                    <img id="displayCarImg" src="${pageContext.request.contextPath}${car.primaryImageUrl}"
                                                         alt="${car.carName}" />
                                                 </div>
                                             </c:when>

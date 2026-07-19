@@ -9,8 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Database Context utility for Car Rental application.
- * Provides connection pooling and query execution helpers.
+ * Database Context utility for Car Rental application. Provides connection
+ * pooling and query execution helpers.
  *
  * @author Le Anh Tuan - CE180905
  */
@@ -18,7 +18,7 @@ public class DBContext {
 
     private final String DB_URL = "jdbc:sqlserver://127.0.0.1:1433;databaseName=car_rental_db;encrypt=false";
     private final String DB_USER = "sa";
-    private final String DB_PWD = "12345";
+    private final String DB_PWD = "123456";
 
     private Connection conn;
     private PreparedStatement statement;
@@ -44,7 +44,7 @@ public class DBContext {
     /**
      * Execute Select Query with parameters.
      *
-     * @param query  SQL query string
+     * @param query SQL query string
      * @param params Parameters for the query
      * @return ResultSet
      */
@@ -78,7 +78,7 @@ public class DBContext {
     /**
      * Execute INSERT/UPDATE/DELETE queries.
      *
-     * @param query  SQL query string
+     * @param query SQL query string
      * @param params Parameters for the query
      * @return Number of affected rows
      */

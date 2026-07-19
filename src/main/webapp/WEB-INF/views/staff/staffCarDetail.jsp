@@ -102,7 +102,7 @@
                     <c:choose>
                         <c:when test="${not empty carDetail.primaryImageUrl}">
                             <div style="margin-bottom: 2rem; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--color-dark-border); box-shadow: var(--shadow-md);">
-                                <img src="${carDetail.primaryImageUrl}" style="width: 100%; height: 380px; object-fit: cover; display: block;" alt="Car Image" />
+                                <img src="${pageContext.request.contextPath}${carDetail.primaryImageUrl}" style="width: 100%; height: 380px; object-fit: cover; display: block;" alt="Car Image" />
                             </div>
                         </c:when>
                         <c:otherwise>

@@ -55,7 +55,7 @@
                                             <div class="car-card-image">
                                                 <c:choose>
                                                     <c:when test="${not empty car.primaryImageUrl}">
-                                                        <img src="${car.primaryImageUrl}" alt="${car.carName}"
+                                                        <img src="${pageContext.request.contextPath}${car.primaryImageUrl}" alt="${car.carName}"
                                                             loading="lazy" />
                                                     </c:when>
                                                     <c:otherwise>
