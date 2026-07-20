@@ -391,11 +391,11 @@ public class UserDAO {
     // Staff & Role Management
     // =========================================================================
 
-    public List<User> getAllStaffAccounts() {
-        return getAllStaffs();
+    public List<User> getAllStaffAccounts(int offset, int limit) {
+        return getAllStaffs(offset, limit);
     }
 
-    public List<User> getAllStaffs() {
+    public List<User> getAllStaffs(int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<User> list = new ArrayList<>();
@@ -403,9 +403,10 @@ public class UserDAO {
                 + "p.full_name, p.avatar_url "
                 + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
                 + "WHERE u.role_id = 2 AND u.status <> 'Inactive' "
-                + "ORDER BY u.created_at DESC";
+                + "ORDER BY u.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query);
+            rs = db.executeSelectQuery(query, new Object[]{offset, limit});
             while (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
                 user.setFullName(rs.getString("full_name"));
@@ -420,11 +421,29 @@ public class UserDAO {
         return list;
     }
 
-    public List<User> searchStaffAccounts(String keyword) {
-        return searchStaff(keyword);
+    public int countAllStaffAccounts() {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM [User] WHERE role_id = 2 AND status <> 'Inactive'";
+        try {
+            rs = db.executeSelectQuery(query);
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllStaffAccounts failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
-    public List<User> searchStaff(String keyword) {
+    public List<User> searchStaffAccounts(String keyword, int offset, int limit) {
+        return searchStaff(keyword, offset, limit);
+    }
+
+    public List<User> searchStaff(String keyword, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<User> list = new ArrayList<>();
@@ -433,10 +452,11 @@ public class UserDAO {
                 + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
                 + "WHERE u.role_id = 2 AND u.status <> 'Inactive' "
                 + "AND (p.full_name LIKE ? OR u.email LIKE ? OR u.phone_number LIKE ?) "
-                + "ORDER BY u.created_at DESC";
+                + "ORDER BY u.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap });
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, offset, limit });
             while (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
                 user.setFullName(rs.getString("full_name"));
@@ -449,6 +469,28 @@ public class UserDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countSearchStaffAccounts(String keyword) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt "
+                + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
+                + "WHERE u.role_id = 2 AND u.status <> 'Inactive' "
+                + "AND (p.full_name LIKE ? OR u.email LIKE ? OR u.phone_number LIKE ?)";
+        String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap });
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countSearchStaffAccounts failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
     public User getStaffDetail(int staffId) {
@@ -495,6 +537,14 @@ public class UserDAO {
     }
 
     public List<User> getAllUsersByRole(int roleId) {
+        return getAllUsersByRole(roleId, 0, 1000000);
+    }
+
+    public List<User> getAllStaffs() {
+        return getAllUsersByRole(2, 0, 1000000);
+    }
+
+    public List<User> getAllUsersByRole(int roleId, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<User> list = new ArrayList<>();
@@ -502,9 +552,10 @@ public class UserDAO {
                 + "p.full_name, p.avatar_url "
                 + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
                 + "WHERE u.role_id = ? "
-                + "ORDER BY u.created_at DESC";
+                + "ORDER BY u.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { roleId });
+            rs = db.executeSelectQuery(query, new Object[] { roleId, offset, limit });
             while (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
                 user.setFullName(rs.getString("full_name"));
@@ -519,23 +570,86 @@ public class UserDAO {
         return list;
     }
 
-    public List<User> searchUsersAcrossRoles(String keyword) {
-        return searchUser(keyword);
+    public int countAllUsersByRole(int roleId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM [User] WHERE role_id = ?";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { roleId });
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllUsersByRole failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
-    public List<User> searchUser(String keyword) {
+    public List<User> getAllNonAdminUsers(int offset, int limit) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        List<User> list = new ArrayList<>();
+        String query = "SELECT u.user_id, u.role_id, u.email, u.password, u.phone_number, u.status, u.created_at, u.updated_at, "
+                + "p.full_name, p.avatar_url "
+                + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
+                + "WHERE u.role_id IN (2, 3, 4) "
+                + "ORDER BY u.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { offset, limit });
+            while (rs != null && rs.next()) {
+                User user = mapRowToUser(rs);
+                user.setFullName(rs.getString("full_name"));
+                user.setAvatarUrl(rs.getString("avatar_url"));
+                list.add(user);
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "getAllNonAdminUsers failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return list;
+    }
+
+    public int countAllNonAdminUsers() {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM [User] WHERE role_id IN (2, 3, 4)";
+        try {
+            rs = db.executeSelectQuery(query);
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllNonAdminUsers failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
+    }
+
+    public List<User> searchUsersAcrossRoles(String keyword, int offset, int limit) {
+        return searchUser(keyword, offset, limit);
+    }
+
+    public List<User> searchUser(String keyword, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<User> list = new ArrayList<>();
         String query = "SELECT u.user_id, u.role_id, u.email, u.password, u.phone_number, u.status, u.created_at, u.updated_at, "
                 + "p.full_name "
                 + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
-                + "WHERE (u.role_id = 3 OR u.role_id = 4) AND u.status <> 'Inactive' "
+                + "WHERE (u.role_id = 2 OR u.role_id = 3 OR u.role_id = 4) AND u.status <> 'Inactive' "
                 + "AND (p.full_name LIKE ? OR u.email LIKE ? OR u.phone_number LIKE ?) "
-                + "ORDER BY u.created_at DESC";
+                + "ORDER BY u.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap });
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, offset, limit });
             while (rs != null && rs.next()) {
                 User user = mapRowToUser(rs);
                 user.setFullName(rs.getString("full_name"));
@@ -547,6 +661,28 @@ public class UserDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countSearchUsersAcrossRoles(String keyword) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt "
+                + "FROM [User] u LEFT JOIN [Profile] p ON u.user_id = p.user_id "
+                + "WHERE (u.role_id = 2 OR u.role_id = 3 OR u.role_id = 4) AND u.status <> 'Inactive' "
+                + "AND (p.full_name LIKE ? OR u.email LIKE ? OR u.phone_number LIKE ?)";
+        String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap });
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countSearchUsersAcrossRoles failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
     private User mapRowToUser(ResultSet rs) throws SQLException {

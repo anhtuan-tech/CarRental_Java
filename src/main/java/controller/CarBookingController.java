@@ -481,17 +481,39 @@ public class CarBookingController extends HttpServlet {
             } catch (Exception e) {
                 response.sendRedirect(request.getContextPath() + "/staff/bookings?action=list");
             }
-        } else if ("search".equalsIgnoreCase(action)) {
-            String kw = request.getParameter("keyword");
-            List<Booking> list = bookingDAO.searchByKeyword(kw);
-            request.setAttribute("carBookingList", list);
-            request.setAttribute("keywordVal", kw);
-            request.getRequestDispatcher("/WEB-INF/views/staff/carBookingList.jsp").forward(request, response);
-        } else {
-            List<Booking> list = bookingDAO.getAllCarBookings();
-            request.setAttribute("carBookingList", list);
-            request.getRequestDispatcher("/WEB-INF/views/staff/carBookingList.jsp").forward(request, response);
+            return;
         }
+
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+
+        int offset = (page - 1) * size;
+        int totalRecords = 0;
+        List<Booking> list;
+
+        if ("search".equalsIgnoreCase(action)) {
+            String kw = request.getParameter("keyword");
+            if (kw == null) kw = "";
+            list = bookingDAO.searchByKeyword(kw, offset, size);
+            totalRecords = bookingDAO.countSearchByKeyword(kw);
+            request.setAttribute("keywordVal", kw);
+        } else {
+            list = bookingDAO.getAllCarBookings(offset, size);
+            totalRecords = bookingDAO.countAllCarBookings();
+        }
+
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
+        request.setAttribute("carBookingList", list);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        request.getRequestDispatcher("/WEB-INF/views/staff/carBookingList.jsp").forward(request, response);
     }
 
     private void handleStaffPostRouting(HttpServletRequest request, HttpServletResponse response)

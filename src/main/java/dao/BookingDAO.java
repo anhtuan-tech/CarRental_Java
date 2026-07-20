@@ -213,6 +213,10 @@ public class BookingDAO {
      * Retrieve all rental orders for an owner's fleet (UC-16.1).
      */
     public List<Booking> getAllBookingByOwnerId(int ownerId) {
+        return getAllBookingByOwnerId(ownerId, 0, 1000000);
+    }
+
+    public List<Booking> getAllBookingByOwnerId(int ownerId, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Booking> list = new ArrayList<>();
@@ -225,9 +229,10 @@ public class BookingDAO {
                 + "JOIN Profile p ON b.customer_id = p.user_id "
                 + "LEFT JOIN Profile op ON c.owner_id = op.user_id "
                 + "WHERE c.owner_id = ? AND c.status <> 'Deleted' "
-                + "ORDER BY b.created_at DESC";
+                + "ORDER BY b.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { ownerId });
+            rs = db.executeSelectQuery(query, new Object[] { ownerId, offset, limit });
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -240,10 +245,33 @@ public class BookingDAO {
         return list;
     }
 
+    public int countAllBookingByOwnerId(int ownerId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        String query = "SELECT COUNT(*) AS total FROM Booking b "
+                + "JOIN Car c ON b.car_id = c.car_id "
+                + "WHERE c.owner_id = ? AND c.status <> 'Deleted'";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { ownerId });
+            if (rs != null && rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllBookingByOwnerId failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return 0;
+    }
+
     /**
      * Retrieve all car bookings in the system (UC-18.1).
      */
     public List<Booking> getAllCarBookings() {
+        return getAllCarBookings(0, 1000000);
+    }
+
+    public List<Booking> getAllCarBookings(int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Booking> list = new ArrayList<>();
@@ -255,9 +283,10 @@ public class BookingDAO {
                 + "JOIN Car c ON b.car_id = c.car_id "
                 + "JOIN Profile p ON b.customer_id = p.user_id "
                 + "LEFT JOIN Profile op ON c.owner_id = op.user_id "
-                + "ORDER BY b.created_at DESC";
+                + "ORDER BY b.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query);
+            rs = db.executeSelectQuery(query, new Object[] { offset, limit });
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -270,11 +299,28 @@ public class BookingDAO {
         return list;
     }
 
+    public int countAllCarBookings() {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        String query = "SELECT COUNT(*) AS total FROM Booking";
+        try {
+            rs = db.executeSelectQuery(query);
+            if (rs != null && rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllCarBookings failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return 0;
+    }
+
     public Booking getCarBookingDetail(int carBookingId) {
         return getBookingById(carBookingId);
     }
 
-    public List<Booking> searchByKeyword(String keyword) {
+    public List<Booking> searchByKeyword(String keyword, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Booking> list = new ArrayList<>();
@@ -287,10 +333,11 @@ public class BookingDAO {
                 + "JOIN Profile p ON b.customer_id = p.user_id "
                 + "LEFT JOIN Profile op ON c.owner_id = op.user_id "
                 + "WHERE p.full_name LIKE ? OR p.phone LIKE ? OR c.car_name LIKE ? OR c.brand LIKE ? OR b.status LIKE ? "
-                + "ORDER BY b.created_at DESC";
+                + "ORDER BY b.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, wrap, wrap });
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, wrap, wrap, offset, limit });
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -301,6 +348,27 @@ public class BookingDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countSearchByKeyword(String keyword) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        String query = "SELECT COUNT(*) AS total FROM Booking b "
+                + "JOIN Car c ON b.car_id = c.car_id "
+                + "JOIN Profile p ON b.customer_id = p.user_id "
+                + "WHERE p.full_name LIKE ? OR p.phone LIKE ? OR c.car_name LIKE ? OR c.brand LIKE ? OR b.status LIKE ?";
+        String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
+        try {
+            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, wrap, wrap });
+            if (rs != null && rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countSearchByKeyword failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return 0;
     }
 
     public boolean updateStatus(String status, int bookingId, int actorId, String oldStatus, String note) {

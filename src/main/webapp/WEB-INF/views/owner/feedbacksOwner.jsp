@@ -186,13 +186,43 @@
 
                                 </div>
                             </c:forEach>
+
+                            <!-- Pagination Controls -->
+                            <c:if test="${totalPages > 0}">
+                                <div class="pagination-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem;">
+                                    <div class="page-size-selector">
+                                        <form action="${pageContext.request.contextPath}/owner/feedbacks" method="get" style="margin:0; display:flex; align-items:center; gap:0.5rem;">
+                                            <span class="text-sm text-muted">Show:</span>
+                                            <select name="size" class="form-control" style="width:70px; height:32px; padding:0 0.5rem; background:var(--color-dark-card); border-color:var(--color-dark-border); color:var(--color-white);" onchange="this.form.submit()">
+                                                <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                                                <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                                <option value="15" ${pageSize == 15 ? 'selected' : ''}>15</option>
+                                                <option value="30" ${pageSize == 30 ? 'selected' : ''}>30</option>
+                                                <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                            </select>
+                                            <span class="text-sm text-muted">entries</span>
+                                        </form>
+                                    </div>
+                                    <div class="pagination-links" style="display:flex; gap:0.25rem;">
+                                        <c:set var="prevPage" value="${currentPage - 1 > 0 ? currentPage - 1 : 1}" />
+                                        <a href="?size=${pageSize}&page=${prevPage}" class="btn btn-sm ${currentPage == 1 ? 'disabled' : ''}" style="border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);">&laquo; Prev</a>
+                                        
+                                        <c:forEach begin="1" end="${totalPages}" var="p">
+                                            <a href="?size=${pageSize}&page=${p}" class="btn btn-sm" style="${p == currentPage ? 'background:var(--orange); color:white; border-color:var(--orange);' : 'border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);'}">${p}</a>
+                                        </c:forEach>
+                                        
+                                        <c:set var="nextPage" value="${currentPage + 1 <= totalPages ? currentPage + 1 : totalPages}" />
+                                        <a href="?size=${pageSize}&page=${nextPage}" class="btn btn-sm ${currentPage == totalPages ? 'disabled' : ''}" style="border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);">Next &raquo;</a>
+                                    </div>
+                                </div>
+                            </c:if>
                         </c:when>
                         <c:otherwise>
                             <div class="empty-state" style="background: var(--color-dark-card); border: 1px solid var(--color-dark-border); border-radius: var(--radius-xl); padding: 3rem; text-align: center;">
                                 <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="bi bi-chat-left-dots-fill" style="color: var(--orange);"></i></div>
                                 <h3 style="color: var(--color-white); font-size: 1.25rem; margin-bottom: 0.5rem;">No Customer Reviews Yet</h3>
                                 <p style="color: var(--color-gray-mid); font-size: 0.9rem;">
-                                    Once customers complete reservations for your vehicles, their reviews and ratings will appear here.
+                                    Once customers complete reservations for your cars, their reviews and ratings will appear here.
                                 </p>
                             </div>
                         </c:otherwise>

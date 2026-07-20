@@ -36,10 +36,26 @@ public class OwnerFeedbackController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         FeedbackDAO feedbackDAO = new FeedbackDAO();
-        List<Feedback> feedbacks = feedbackDAO.getFeedbacksByOwnerId(user.getUserId());
+        int totalRecords = feedbackDAO.countFeedbacksByOwnerId(user.getUserId());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
+        List<Feedback> feedbacks = feedbackDAO.getFeedbacksByOwnerId(user.getUserId(), offset, size);
 
         request.setAttribute("feedbacks", feedbacks);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
         request.getRequestDispatcher("/WEB-INF/views/owner/feedbacksOwner.jsp").forward(request, response);
     }
 

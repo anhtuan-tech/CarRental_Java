@@ -8,7 +8,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Vehicle Details — Car Rental Owner</title>
+        <title>Car Details — Car Rental Owner</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cropper.min.css" />
         <style>
@@ -292,11 +292,11 @@
                                     <h3
                                         style="color:var(--color-white); font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; text-align:left; margin-top:0;">
                                         <i class="bi bi-crop" style="color:var(--color-blue-light);"></i> Crop
-                                        Vehicle Photo
+                                        Car Photo
                                     </h3>
                                     <p
                                         style="color:var(--color-gray-light); font-size:0.85rem; margin-bottom:1.5rem; text-align:left;">
-                                        Drag and resize the box to crop your vehicle image perfectly.</p>
+                                        Drag and resize the box to crop your car image perfectly.</p>
 
                                     <div class="img-container"
                                          style="max-height:350px; overflow:hidden; background:#000; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
@@ -326,7 +326,7 @@
                                         <table class="history-table">
                                             <thead>
                                                 <tr>
-                                                    <th>Order ID</th>
+                                                    <th>No.</th>
                                                     <th>Customer</th>
                                                     <th>Duration</th>
                                                     <th>Total Fee</th>
@@ -334,11 +334,9 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <c:forEach var="item" items="${history}">
+                                                <c:forEach var="item" items="${history}" varStatus="loop">
                                                     <tr>
-                                                        <td>#
-                                                            <c:out value="${item.bookingId}" />
-                                                        </td>
+                                                        <td>#<c:out value="${loop.index + 1}" /></td>
                                                         <td>
                                                             <c:out value="${item.customerName}" />
                                                         </td>
@@ -369,7 +367,7 @@
                                     </c:when>
                                     <c:otherwise>
                                         <p class="text-sm text-muted" style="margin-top: 1rem;">No rental
-                                            records found for this vehicle.</p>
+                                            records found for this car.</p>
                                         </c:otherwise>
                                     </c:choose>
                             </div>
@@ -392,7 +390,7 @@
                                     <input type="hidden" name="carId" value="${car.carId}" />
 
                                     <div class="form-group">
-                                        <label for="carName" class="form-label">Vehicle Name</label>
+                                        <label for="carName" class="form-label">Car Name</label>
                                         <input type="text" id="carName" name="carName" class="form-control"
                                                value="<c:out value='${car.carName}'/>" required />
                                     </div>
@@ -458,7 +456,7 @@
                                         style="margin: 1.5rem 0; padding: 1rem; background: var(--color-dark-surface); border: 1px solid var(--color-dark-border); border-radius: var(--radius-lg);">
                                         <h4
                                             style="font-size: 0.9rem; font-weight: 700; color: var(--color-white); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                            Vehicle Specs Detail</h4>
+                                            Car Specs Detail</h4>
 
                                         <div class="form-group">
                                             <label for="specTransmission" class="form-label"
@@ -677,7 +675,7 @@
 
                                 wrapper.innerHTML =
                                         '<div class="car-image-banner" style="margin-bottom:0; width:100%; height:' + height + '; border-radius: var(--radius-xl); overflow:hidden; border:1px solid var(--color-dark-border);">' +
-                                        '<img id="displayCarImg" src="' + base64Image + '" style="width:100%; height:100%; object-fit:cover;" alt="Vehicle Image" />' +
+                                        '<img id="displayCarImg" src="' + base64Image + '" style="width:100%; height:100%; object-fit:cover;" alt="Car Image" />' +
                                         '</div>' +
                                         '<div class="image-overlay" style="position: absolute; top:0; left:0; width:100%; height:' + height + '; background: rgba(0,0,0,0.5); display: flex; flex-direction:column; align-items:center; justify-content:center; border-radius: var(--radius-xl); opacity:0; transition: opacity 0.2s ease;">' +
                                         '<i class="bi bi-camera-fill" style="font-size:2.5rem; color:#FFF; margin-bottom:0.5rem;"></i>' +

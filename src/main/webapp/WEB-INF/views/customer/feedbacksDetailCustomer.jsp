@@ -87,8 +87,8 @@
                     </c:if>
 
                     <div class="form-group">
-                        <span class="form-label" style="display:block; margin-bottom:0.25rem;">Submission
-                            Timestamp</span>
+                        <span class="form-label" style="display:block; margin-bottom:0.25rem;">
+                            Times</span>
                         <div class="read-only-box" style="font-size:0.85rem; font-family:monospace;">
                             <c:out value="${fn:substring(feedback.createdAt.toString(), 0, 19)}" />
                         </div>

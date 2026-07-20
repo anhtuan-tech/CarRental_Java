@@ -303,7 +303,7 @@
 
                     <!-- Left Side: Profile Form -->
                     <div class="profile-card">
-                        <div class="profile-card-title">Personal Details</div>
+                        <div class="profile-card-title">Profile</div>
                         <div class="profile-card-subtitle">Manage your personal credentials, contact info, and
                             documents.</div>
                         <div class="blue-line" style="margin-bottom: 1.5rem;"></div>

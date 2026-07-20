@@ -139,15 +139,33 @@ public class MyCarController extends HttpServlet {
     private void handleOwnerCarList(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         CarDAO carDAO = new CarDAO();
+        int totalRecords = carDAO.countCarsByOwner(user.getUserId());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
         // BR37 – owner view restriction is applied inside CarDAO query
-        List<Car> carList = carDAO.getCarsByOwner(user.getUserId());
+        List<Car> carList = carDAO.getCarsByOwner(user.getUserId(), offset, size);
 
         if (carList == null || carList.isEmpty()) {
             request.setAttribute("message", "No registered vehicles");
         } else {
             request.setAttribute("carList", carList);
         }
+
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+
         request.getRequestDispatcher("/WEB-INF/views/owner/carList.jsp").forward(request, response);
     }
 
@@ -164,16 +182,34 @@ public class MyCarController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         CarDAO carDAO = new CarDAO();
+        int totalRecords = carDAO.countSearchCars(user.getUserId(), keyword.trim());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
         // BR39 – Scopes keyword search strictly inside the owner's active collection
-        List<Car> carList = carDAO.searchCars(user.getUserId(), keyword.trim());
+        List<Car> carList = carDAO.searchCars(user.getUserId(), keyword.trim(), offset, size);
 
         if (carList == null || carList.isEmpty()) {
             request.setAttribute("message", "No matching vehicle");
         } else {
             request.setAttribute("carList", carList);
         }
+        
         request.setAttribute("keywordVal", keyword);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        
         request.getRequestDispatcher("/WEB-INF/views/owner/carList.jsp").forward(request, response);
     }
 

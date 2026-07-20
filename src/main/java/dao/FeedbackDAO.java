@@ -268,7 +268,7 @@ public class FeedbackDAO {
     /**
      * Retrieve all feedbacks for cars owned by a specific Owner.
      */
-    public List<Feedback> getFeedbacksByOwnerId(int ownerId) {
+    public List<Feedback> getFeedbacksByOwnerId(int ownerId, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Feedback> list = new ArrayList<>();
@@ -280,9 +280,10 @@ public class FeedbackDAO {
                 + "JOIN Car c ON b.car_id = c.car_id "
                 + "JOIN Profile p ON f.customer_id = p.user_id "
                 + "WHERE c.owner_id = ? "
-                + "ORDER BY f.created_at DESC";
+                + "ORDER BY f.created_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, offset, limit});
             while (rs != null && rs.next()) {
                 Feedback f = mapRowToFeedback(rs);
                 f.setReviewerName(maskName(rs.getString("full_name")));
@@ -297,6 +298,27 @@ public class FeedbackDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countFeedbacksByOwnerId(int ownerId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        String query = "SELECT COUNT(*) as total "
+                + "FROM Feedback f "
+                + "JOIN Booking b ON f.booking_id = b.booking_id "
+                + "JOIN Car c ON b.car_id = c.car_id "
+                + "WHERE c.owner_id = ?";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            if (rs != null && rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countFeedbacksByOwnerId failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return 0;
     }
 
     /**

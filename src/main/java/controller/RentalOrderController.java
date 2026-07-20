@@ -36,14 +36,31 @@ public class RentalOrderController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         BookingDAO bookingDAO = new BookingDAO();
-        List<Booking> orders = bookingDAO.getAllBookingByOwnerId(user.getUserId());
+        int totalRecords = bookingDAO.countAllBookingByOwnerId(user.getUserId());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
+        List<Booking> orders = bookingDAO.getAllBookingByOwnerId(user.getUserId(), offset, size);
 
         if (orders == null || orders.isEmpty()) {
             request.setAttribute("message", "No rental transactions");
         } else {
             request.setAttribute("orders", orders);
         }
+
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
 
         request.getRequestDispatcher("/WEB-INF/views/owner/listRentalOrders.jsp").forward(request, response);
     }

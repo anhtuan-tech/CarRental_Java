@@ -74,18 +74,29 @@ public class CarController extends HttpServlet {
             }
         }
 
+        // Get size
+        int size = 15;
+        String sizeParam = request.getParameter("size");
+        if (sizeParam != null) {
+            try {
+                size = Integer.parseInt(sizeParam);
+                if (size < 1) size = 15;
+            } catch (NumberFormatException ignored) {}
+        }
+
         int totalCars = carDAO.getAvailableCarCount();
-        int totalPages = (int) Math.ceil((double) totalCars / PAGE_SIZE);
+        int totalPages = (int) Math.ceil((double) totalCars / size);
         if (totalPages < 1) totalPages = 1;
         if (page > totalPages) page = totalPages;
 
-        int offset = (page - 1) * PAGE_SIZE;
-        List<Car> cars = carDAO.getAvailableCar(offset, PAGE_SIZE);
+        int offset = (page - 1) * size;
+        List<Car> cars = carDAO.getAvailableCar(offset, size);
         List<CarType> carTypes = carDAO.getAllCarTypes();
 
         request.setAttribute("cars", cars);
         request.setAttribute("totalCars", totalCars);
         request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("carTypes", carTypes);
 
@@ -175,19 +186,30 @@ public class CarController extends HttpServlet {
             }
         }
 
+        // Get size
+        int size = 15;
+        String sizeParam = request.getParameter("size");
+        if (sizeParam != null) {
+            try {
+                size = Integer.parseInt(sizeParam);
+                if (size < 1) size = 15;
+            } catch (NumberFormatException ignored) {}
+        }
+
         int totalCars = carDAO.searchCarsCount(searchVal, typeId, minPrice, maxPrice);
-        int totalPages = (int) Math.ceil((double) totalCars / PAGE_SIZE);
+        int totalPages = (int) Math.ceil((double) totalCars / size);
         if (totalPages < 1) totalPages = 1;
         if (page > totalPages) page = totalPages;
 
-        int offset = (page - 1) * PAGE_SIZE;
-        List<Car> cars = carDAO.searchCars(searchVal, typeId, minPrice, maxPrice, offset, PAGE_SIZE);
+        int offset = (page - 1) * size;
+        List<Car> cars = carDAO.searchCars(searchVal, typeId, minPrice, maxPrice, offset, size);
         List<CarType> carTypes = carDAO.getAllCarTypes();
 
         // Bind attributes
         request.setAttribute("cars", cars);
         request.setAttribute("totalCars", totalCars);
         request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("carTypes", carTypes);
 
@@ -271,15 +293,33 @@ public class CarController extends HttpServlet {
     private void handleStaffCarList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         CarDAO carDAO = new CarDAO();
+        int totalRecords = carDAO.countAllCars();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
         // BR83: Fetch all cars regardless of status
-        List<Car> carList = carDAO.getAllCars();
+        List<Car> carList = carDAO.getAllCars(offset, size);
 
         if (carList == null || carList.isEmpty()) {
             request.setAttribute("message", "No cars available");
         } else {
             request.setAttribute("carList", carList);
         }
+        
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+
         request.getRequestDispatcher("/WEB-INF/views/staff/staffCarList.jsp").forward(request, response);
     }
 
@@ -313,9 +353,21 @@ public class CarController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         CarDAO carDAO = new CarDAO();
+        int totalRecords = carDAO.countSearchByKeyword(keyword.trim());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+
         // BR88: Master vehicle search scopes the entire database space
-        List<Car> carList = carDAO.searchByKeyword(keyword.trim());
+        List<Car> carList = carDAO.searchByKeyword(keyword.trim(), offset, size);
 
         if (carList == null || carList.isEmpty()) {
             request.getSession(true).setAttribute("toastErrorMsg", "No car found matching keyword");
@@ -325,6 +377,11 @@ public class CarController extends HttpServlet {
 
         request.setAttribute("carList", carList);
         request.setAttribute("keywordVal", keyword);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+
         request.getRequestDispatcher("/WEB-INF/views/staff/staffCarList.jsp").forward(request, response);
     }
 

@@ -19,7 +19,7 @@
                     /* ── Grid layout ─────────────────────────────────────── */
                     .car-grid {
                         display: grid;
-                        grid-template-columns: 70px 90px 2.5fr 1.5fr 2fr 1.5fr 1.5fr;
+                        grid-template-columns: 70px 90px 2.5fr 1.5fr 2fr 1.5fr 1.5fr 80px;
                         align-items: center;
                         gap: var(--space-4);
                         width: 100%;
@@ -133,15 +133,7 @@
                             <li class="mgmt-menu-item active"><a href="${pageContext.request.contextPath}/staff/cars"><i
                                         class="bi bi-car-front-fill"></i> Manage Cars</a></li>
                         </ul>
-                        <div class="mgmt-sidebar-footer">
-                            <div class="mgmt-user-info"><i class="bi bi-person-circle"></i>
-                                <c:out value="${sessionScope.user.email}" />
-                            </div>
-                            <a href="${pageContext.request.contextPath}/logout"
-                                style="display:block; margin-top:0.5rem; font-size:0.8rem; color:#EF4444; text-decoration:none;"><i
-                                    class="bi bi-box-arrow-right"></i> Logout</a>
-                        </div>
-                    </aside>
+            </aside>
 
                     <!-- Main Content -->
                     <main class="mgmt-content">
@@ -150,7 +142,7 @@
                             <div class="mb-6">
                                 <h1 class="hero-title"
                                     style="font-size: 2rem; margin-bottom: 0.5rem; text-align: left;">
-                                    Master <span>Vehicle List</span>
+                                    Manage <span>Cars</span>
                                 </h1>
                                 <p class="text-muted text-sm">Review, verify registration specs, and approve vehicle
                                     partner applications.</p>
@@ -161,11 +153,16 @@
                                 style="display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin-bottom:1.5rem; flex-wrap:wrap; width:100%;">
                                 <!-- Left: Instant Search Input -->
                                 <div style="flex-grow:1; max-width:400px; position:relative;">
-                                    <input type="text" id="carSearchInput" class="form-control"
-                                        placeholder="Search by name, plate, owner name..."
-                                        style="padding-left:2.5rem; height:42px;" />
-                                    <i class="bi bi-search"
-                                        style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--color-gray-light); font-size:0.95rem;"></i>
+                                    <form action="${pageContext.request.contextPath}/staff/cars" method="get" style="margin:0;">
+                                        <input type="hidden" name="action" value="search" />
+                                        <input type="hidden" name="size" value="${pageSize != null ? pageSize : 10}" />
+                                        <input type="text" name="keyword" value="${keywordVal}" class="form-control"
+                                            placeholder="Search by name, plate, owner name and press Enter..."
+                                            style="padding-left:2.5rem; height:42px;" />
+                                        <i class="bi bi-search"
+                                            style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--color-gray-light); font-size:0.95rem;"></i>
+                                        <button type="submit" style="display:none;"></button>
+                                    </form>
                                 </div>
 
                                 <!-- Right: Status filter dropdown -->
@@ -198,6 +195,7 @@
                                         <div>Owner</div>
                                         <div>Rate / Day</div>
                                         <div style="text-align:right;">Status</div>
+                                        <div style="text-align:center;">Action</div>
                                     </div>
 
                                     <!-- Data rows -->
@@ -258,9 +256,52 @@
                                                     </span>
                                                 </div>
 
+                                                <!-- Action -->
+                                                <div class="grid-col" style="text-align:center;">
+                                                    <div style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:rgba(249,115,22,0.1); color:var(--orange); transition:0.2s;"
+                                                         onmouseover="this.style.background='var(--orange)'; this.style.color='white';"
+                                                         onmouseout="this.style.background='rgba(249,115,22,0.1)'; this.style.color='var(--orange)';">
+                                                        <i class="bi bi-eye-fill" style="font-size:1.1rem;"></i>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </a>
                                     </c:forEach>
+                                    
+                                    <!-- Pagination Controls -->
+                                    <c:if test="${totalPages > 0}">
+                                        <div class="pagination-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem;">
+                                            <div class="page-size-selector">
+                                                <form action="${pageContext.request.contextPath}/staff/cars" method="get" style="margin:0; display:flex; align-items:center; gap:0.5rem;">
+                                                    <input type="hidden" name="action" value="${not empty keywordVal ? 'search' : 'list'}" />
+                                                    <c:if test="${not empty keywordVal}">
+                                                        <input type="hidden" name="keyword" value="${keywordVal}" />
+                                                    </c:if>
+                                                    <span class="text-sm text-muted">Show:</span>
+                                                    <select name="size" class="form-control" style="width:70px; height:32px; padding:0 0.5rem; background:var(--color-dark-card); border-color:var(--color-dark-border); color:var(--color-white);" onchange="this.form.submit()">
+                                                        <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                                                        <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                                        <option value="15" ${pageSize == 15 ? 'selected' : ''}>15</option>
+                                                        <option value="30" ${pageSize == 30 ? 'selected' : ''}>30</option>
+                                                        <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                                    </select>
+                                                    <span class="text-sm text-muted">entries</span>
+                                                </form>
+                                            </div>
+                                            <div class="pagination-links" style="display:flex; gap:0.25rem;">
+                                                <c:set var="prevPage" value="${currentPage - 1 > 0 ? currentPage - 1 : 1}" />
+                                                <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${prevPage}" class="btn btn-sm ${currentPage == 1 ? 'disabled' : ''}" style="border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);">&laquo; Prev</a>
+                                                
+                                                <c:forEach begin="1" end="${totalPages}" var="p">
+                                                    <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${p}" class="btn btn-sm" style="${p == currentPage ? 'background:var(--orange); color:white; border-color:var(--orange);' : 'border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);'}">${p}</a>
+                                                </c:forEach>
+                                                
+                                                <c:set var="nextPage" value="${currentPage + 1 <= totalPages ? currentPage + 1 : totalPages}" />
+                                                <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${nextPage}" class="btn btn-sm ${currentPage == totalPages ? 'disabled' : ''}" style="border:1px solid var(--color-dark-border); background:var(--color-dark-card); color:var(--color-white);">Next &raquo;</a>
+                                            </div>
+                                        </div>
+                                    </c:if>
 
                                 </c:when>
                                 <c:otherwise>
@@ -287,9 +328,10 @@
 
                         function applyFilter() {
                             var selectedStatus = statusFilter.value;
-                            var searchVal = searchInput.value.trim().toLowerCase();
+                            var searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
                             var cards = document.querySelectorAll(".car-row-card");
                             var visibleCount = 0;
+                            var paginationWrapper = document.querySelector(".pagination-wrapper");
 
                             cards.forEach(function (card) {
                                 var cardStatus = card.getAttribute("data-status");
@@ -333,6 +375,7 @@
 
                             if (visibleCount === 0) {
                                 if (header) header.style.display = "none";
+                                if (paginationWrapper) paginationWrapper.style.display = "none";
                                 if (!emptyState) {
                                     emptyState = document.createElement("div");
                                     emptyState.id = "emptyFilterState";
@@ -346,6 +389,7 @@
                                 }
                             } else {
                                 if (header) header.style.display = "";
+                                if (paginationWrapper) paginationWrapper.style.display = "flex";
                                 if (emptyState) emptyState.style.display = "none";
                             }
                         }

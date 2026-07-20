@@ -34,10 +34,6 @@
                         <i class="bi bi-chevron-down nav-chevron"></i>
                     </button>
                     <div class="nav-dropdown-menu" id="navDropdownMenu">
-                        <a href="${pageContext.request.contextPath}/profile"
-                           class="nav-dropdown-item"><i class="bi bi-person-circle"></i> My
-                            Profile</a>
-                        <div class="nav-dropdown-divider"></div>
                         <a href="${pageContext.request.contextPath}/logout"
                            class="nav-dropdown-item nav-dropdown-item--danger"><i
                                 class="bi bi-box-arrow-right"></i> Logout</a>
@@ -75,10 +71,6 @@
                         <i class="bi bi-chevron-down nav-chevron"></i>
                     </button>
                     <div class="nav-dropdown-menu" id="navDropdownMenu">
-                        <a href="${pageContext.request.contextPath}/profile"
-                           class="nav-dropdown-item"><i class="bi bi-person-circle"></i> My
-                            Profile</a>
-                        <div class="nav-dropdown-divider"></div>
                         <a href="${pageContext.request.contextPath}/logout"
                            class="nav-dropdown-item nav-dropdown-item--danger"><i
                                 class="bi bi-box-arrow-right"></i> Logout</a>

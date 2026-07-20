@@ -64,21 +64,26 @@ public class RevenueReportController extends HttpServlet {
             }
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         RevenueDAO revenueDAO = new RevenueDAO();
-        List<Booking> list = revenueDAO.getRevenueReport(startDate, endDate);
+        int totalRecords = revenueDAO.countRevenueReport(startDate, endDate);
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        
+        List<Booking> list = revenueDAO.getRevenueReport(startDate, endDate, offset, size);
 
         // Accumulate financial summary metrics (UC-22 step 5)
-        BigDecimal totalSubtotal = BigDecimal.ZERO;
-        BigDecimal totalCommission = BigDecimal.ZERO;
-        BigDecimal totalPayout = BigDecimal.ZERO;
-
-        if (list != null && !list.isEmpty()) {
-            for (Booking b : list) {
-                if (b.getSubtotalFee() != null) totalSubtotal = totalSubtotal.add(b.getSubtotalFee());
-                if (b.getPlatformCommission() != null) totalCommission = totalCommission.add(b.getPlatformCommission());
-                if (b.getOwnerPayout() != null) totalPayout = totalPayout.add(b.getOwnerPayout());
-            }
-        }
+        Booking totals = revenueDAO.getRevenueTotals(startDate, endDate);
+        BigDecimal totalSubtotal = totals.getSubtotalFee() != null ? totals.getSubtotalFee() : BigDecimal.ZERO;
+        BigDecimal totalCommission = totals.getPlatformCommission() != null ? totals.getPlatformCommission() : BigDecimal.ZERO;
+        BigDecimal totalPayout = totals.getOwnerPayout() != null ? totals.getOwnerPayout() : BigDecimal.ZERO;
 
         request.setAttribute("revenueData", list);
         request.setAttribute("totalSubtotal", totalSubtotal);
@@ -86,6 +91,11 @@ public class RevenueReportController extends HttpServlet {
         request.setAttribute("totalPayout", totalPayout);
         request.setAttribute("startDateVal", startDate);
         request.setAttribute("endDateVal", endDate);
+        
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
 
         request.getRequestDispatcher("/WEB-INF/views/admin/revenueReport.jsp").forward(request, response);
     }

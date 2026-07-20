@@ -111,14 +111,32 @@ public class AdminController extends HttpServlet {
     private void handleStaffList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         UserDAO userDAO = new UserDAO();
-        List<User> list = userDAO.getAllStaffs();
+        int totalRecords = userDAO.countAllStaffAccounts();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        
+        List<User> list = userDAO.getAllStaffAccounts(offset, size);
 
         if (list == null || list.isEmpty()) {
             request.setAttribute("message", "No staff accounts available");
         } else {
             request.setAttribute("staffList", list);
         }
+        
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        
         request.getRequestDispatcher("/WEB-INF/views/admin/staffList.jsp").forward(request, response);
     }
 
@@ -134,8 +152,20 @@ public class AdminController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         UserDAO userDAO = new UserDAO();
-        List<User> list = userDAO.searchStaff(keyword.trim());
+        int totalRecords = userDAO.countSearchStaffAccounts(keyword.trim());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        
+        List<User> list = userDAO.searchStaffAccounts(keyword.trim(), offset, size);
 
         if (list == null || list.isEmpty()) {
             request.getSession(true).setAttribute("toastErrorMsg", "No staff found matching keyword");
@@ -145,6 +175,11 @@ public class AdminController extends HttpServlet {
 
         request.setAttribute("staffList", list);
         request.setAttribute("keywordVal", keyword);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        
         request.getRequestDispatcher("/WEB-INF/views/admin/staffList.jsp").forward(request, response);
     }
 
@@ -178,20 +213,29 @@ public class AdminController extends HttpServlet {
             return;
         }
 
+        String croppedAvatarBase64 = request.getParameter("croppedAvatarBase64");
         String avatarUrl = "";
         try {
-            jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
-            if (filePart != null && filePart.getSize() > 0) {
-                String contentType = filePart.getContentType();
-                if (!"image/png".equalsIgnoreCase(contentType) &&
-                        !"image/jpeg".equalsIgnoreCase(contentType) &&
-                        !"image/jpg".equalsIgnoreCase(contentType)) {
-                    throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+            if (croppedAvatarBase64 != null && !croppedAvatarBase64.trim().isEmpty()) {
+                String[] parts = croppedAvatarBase64.split(",");
+                String base64Data = parts.length > 1 ? parts[1] : parts[0];
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data.trim());
+                String avatarFileName = "avatar_staff_" + System.currentTimeMillis() + ".jpg";
+                avatarUrl = utils.FileUploadUtil.saveByteArrayFile(imageBytes, avatarFileName, "avatars", request);
+            } else {
+                jakarta.servlet.http.Part filePart = request.getPart("avatarFile");
+                if (filePart != null && filePart.getSize() > 0) {
+                    String contentType = filePart.getContentType();
+                    if (!"image/png".equalsIgnoreCase(contentType) &&
+                            !"image/jpeg".equalsIgnoreCase(contentType) &&
+                            !"image/jpg".equalsIgnoreCase(contentType)) {
+                        throw new IllegalArgumentException("Only PNG or JPG formats are supported.");
+                    }
+                    if (filePart.getSize() > 5242880) { // 5MB
+                        throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
+                    }
+                    avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff");
                 }
-                if (filePart.getSize() > 5242880) { // 5MB
-                    throw new IllegalArgumentException("Avatar image file size must not exceed 5MB.");
-                }
-                avatarUrl = saveUploadedAvatar(request, filePart, "avatar_staff");
             }
         } catch (Exception ex) {
             request.setAttribute("errorMsg", ex.getMessage() != null ? ex.getMessage() : "Avatar upload failed.");
@@ -441,35 +485,32 @@ public class AdminController extends HttpServlet {
     private void handleUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         UserDAO userDAO = new UserDAO();
-        List<User> list = new java.util.ArrayList<>();
+        int totalRecords = userDAO.countAllNonAdminUsers();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
         
-        List<User> staff = userDAO.getAllUsersByRole(2);
-        if (staff != null) {
-            list.addAll(staff);
-        }
+        List<User> list = userDAO.getAllNonAdminUsers(offset, size);
 
-        List<User> owners = userDAO.getAllUsersByRole(3);
-        if (owners != null) {
-            list.addAll(owners);
-        }
-        
-        List<User> customers = userDAO.getAllUsersByRole(4);
-        if (customers != null) {
-            list.addAll(customers);
-        }
-
-        if (list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             request.setAttribute("message", "No users available");
         } else {
-            list.sort((u1, u2) -> {
-                if (u1.getCreatedAt() == null && u2.getCreatedAt() == null) return 0;
-                if (u1.getCreatedAt() == null) return 1;
-                if (u2.getCreatedAt() == null) return -1;
-                return u2.getCreatedAt().compareTo(u1.getCreatedAt());
-            });
             request.setAttribute("userList", list);
         }
+        
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        
         request.getRequestDispatcher("/WEB-INF/views/admin/userList.jsp").forward(request, response);
     }
 
@@ -482,8 +523,20 @@ public class AdminController extends HttpServlet {
             return;
         }
 
+        int page = 1;
+        int size = 10;
+        try {
+            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
+            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
+        } catch (NumberFormatException ignored) {}
+        
+        int offset = (page - 1) * size;
+
         UserDAO userDAO = new UserDAO();
-        List<User> list = userDAO.searchUser(keyword.trim());
+        int totalRecords = userDAO.countSearchUsersAcrossRoles(keyword.trim());
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        
+        List<User> list = userDAO.searchUsersAcrossRoles(keyword.trim(), offset, size);
 
         if (list == null || list.isEmpty()) {
             request.getSession(true).setAttribute("toastErrorMsg", "No user found matching keyword");
@@ -493,6 +546,11 @@ public class AdminController extends HttpServlet {
 
         request.setAttribute("userList", list);
         request.setAttribute("keywordVal", keyword);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        
         request.getRequestDispatcher("/WEB-INF/views/admin/userList.jsp").forward(request, response);
     }
 

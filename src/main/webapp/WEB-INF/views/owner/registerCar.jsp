@@ -7,7 +7,7 @@
     <head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>Register Vehicle — Car Rental Owner</title>
+        <title>Register Car — Car Rental Owner</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cropper.min.css" />
         <style>
@@ -79,8 +79,8 @@
                     <div class="register-card">
 
                         <div class="mb-4">
-                            <h1 class="hero-title" style="font-size: 1.75rem; margin-bottom: 0.5rem; text-align: left;">Register <span>Vehicle</span></h1>
-                            <p class="text-muted text-sm">Submit your vehicle specs and documentation. Reviews take 24 hours.</p>
+                            <h1 class="hero-title" style="font-size: 1.75rem; margin-bottom: 0.5rem; text-align: left;">Register <span>Car</span></h1>
+                            <p class="text-muted text-sm">Submit your car specs and documentation. Reviews take 24 hours.</p>
                         </div>
                         <div class="blue-line" style="margin-bottom: 2rem;"></div>
 
@@ -93,7 +93,7 @@
                                 </div>
                                 <div class="image-overlay" style="position: absolute; top:0; left:0; width:100%; height:250px; background: rgba(0,0,0,0.5); display: flex; flex-direction:column; align-items:center; justify-content:center; border-radius: var(--radius-xl); opacity:0; transition: opacity 0.2s ease;">
                                     <i class="bi bi-camera-fill" style="font-size:2.5rem; color:#FFF; margin-bottom:0.5rem;"></i>
-                                    <span style="color:#FFF; font-weight:700; font-size:1rem;">Click to Add Vehicle Photo</span>
+                                    <span style="color:#FFF; font-weight:700; font-size:1rem;">Click to Add Car Photo</span>
                                 </div>
                             </div>
 
@@ -103,9 +103,9 @@
                             <div id="cropperModal" class="image-cropper-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
                                 <div class="image-cropper-modal-content" style="background:var(--color-dark-card); border:1px solid var(--color-dark-border); border-radius:var(--radius-xl); width:90%; max-width:600px; padding:2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); box-sizing:border-box;">
                                     <h3 style="color:var(--color-white); font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; text-align:left; margin-top:0;">
-                                        <i class="bi bi-crop" style="color:var(--color-blue-light);"></i> Crop Vehicle Photo
+                                        <i class="bi bi-crop" style="color:var(--color-blue-light);"></i> Crop Car Photo
                                     </h3>
-                                    <p style="color:var(--color-gray-light); font-size:0.85rem; margin-bottom:1.5rem; text-align:left;">Drag and resize the box to crop your vehicle image perfectly.</p>
+                                    <p style="color:var(--color-gray-light); font-size:0.85rem; margin-bottom:1.5rem; text-align:left;">Drag and resize the box to crop your car image perfectly.</p>
 
                                     <div class="img-container" style="max-height:350px; overflow:hidden; background:#000; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
                                         <img id="cropperImageSource" src="" style="max-width:100%; max-height:350px;" />
@@ -122,7 +122,7 @@
 
                             <div class="form-group">
                                 <label for="carName" class="form-label">
-                                    Vehicle Name <span class="required">*</span>
+                                    Car Name <span class="required">*</span>
                                 </label>
                                 <div class="input-wrapper">
                                     <span class="input-icon"><i class="bi bi-car-front-fill"></i></span>
@@ -186,7 +186,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="typeId" class="form-label">Vehicle Category <span class="required">*</span></label>
+                                <label for="typeId" class="form-label">Car Category <span class="required">*</span></label>
                                 <select id="typeId" name="typeId" class="form-control" required>
                                     <c:forEach var="type" items="${requestScope.carTypes}">
                                         <option value="${type.typeId}" ${type.typeId == requestScope.typeIdVal ? 'selected' : ''}>
@@ -223,7 +223,7 @@
                                            id="documentUrl"
                                            name="documentUrl"
                                            class="form-control"
-                                           placeholder="Link to vehicle registration paper PDF / Image (Optional)"
+                                           placeholder="Link to car registration paper PDF / Image (Optional)"
                                            value="<c:out value='${requestScope.documentUrlVal}'/>" />
                                 </div>
                                 <span class="form-hint">Optional registration paper/document file.</span>
@@ -231,7 +231,7 @@
 
                             <!-- Visual Specifications Fields -->
                             <div style="margin: 1.5rem 0; padding: 1rem; background: var(--color-dark-surface); border: 1px solid var(--color-dark-border); border-radius: var(--radius-lg);">
-                                <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--color-white); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Vehicle Specs Detail</h4>
+                                <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--color-white); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Car Specs Detail</h4>
 
                                 <div class="form-group">
                                     <label for="specTransmission" class="form-label" style="font-size: 0.8rem;">Transmission</label>
@@ -295,7 +295,7 @@
                         var wrapper = document.querySelector(".car-image-banner-wrapper");
                         wrapper.innerHTML = `
                                 <div class="car-image-banner" style="margin-bottom:0; width:100%; height:250px; border-radius: var(--radius-xl); overflow:hidden; border:1px solid var(--color-dark-border);">
-                                    <img id="displayCarImg" src="${initialUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Vehicle Image" />
+                                    <img id="displayCarImg" src="${initialUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Car Image" />
                                 </div>
                                 <div class="image-overlay" style="position: absolute; top:0; left:0; width:100%; height:250px; background: rgba(0,0,0,0.5); display: flex; flex-direction:column; align-items:center; justify-content:center; border-radius: var(--radius-xl); opacity:0; transition: opacity 0.2s ease;">
                                     <i class="bi bi-camera-fill" style="font-size:2.5rem; color:#FFF; margin-bottom:0.5rem;"></i>
@@ -457,7 +457,7 @@
 
                                 wrapper.innerHTML =
                                         '<div class="car-image-banner" style="margin-bottom:0; width:100%; height:' + height + '; border-radius: var(--radius-xl); overflow:hidden; border:1px solid var(--color-dark-border);">' +
-                                        '<img id="displayCarImg" src="' + base64Image + '" style="width:100%; height:100%; object-fit:cover;" alt="Vehicle Image" />' +
+                                        '<img id="displayCarImg" src="' + base64Image + '" style="width:100%; height:100%; object-fit:cover;" alt="Car Image" />' +
                                         '</div>' +
                                         '<div class="image-overlay" style="position: absolute; top:0; left:0; width:100%; height:' + height + '; background: rgba(0,0,0,0.5); display: flex; flex-direction:column; align-items:center; justify-content:center; border-radius: var(--radius-xl); opacity:0; transition: opacity 0.2s ease;">' +
                                         '<i class="bi bi-camera-fill" style="font-size:2.5rem; color:#FFF; margin-bottom:0.5rem;"></i>' +

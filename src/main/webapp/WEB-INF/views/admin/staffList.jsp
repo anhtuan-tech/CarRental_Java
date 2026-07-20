@@ -48,7 +48,7 @@
 
             .staff-grid {
                 display: grid;
-                grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr;
+                grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr 80px;
                 align-items: center;
                 gap: var(--space-4);
                 width: 100%;
@@ -135,10 +135,6 @@
                     <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/admin/revenue"><i class="bi bi-bar-chart-line-fill"></i> Revenue Report</a></li>
 
                 </ul>
-                <div class="mgmt-sidebar-footer">
-                    <div class="mgmt-user-info"><i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/></div>
-                    <a href="${pageContext.request.contextPath}/logout" style="display:block; margin-top:0.5rem; font-size:0.8rem; color:#EF4444; text-decoration:none;"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                </div>
             </aside>
             <!-- Main Content -->
             <main class="mgmt-content">
@@ -155,12 +151,15 @@
 
                     <!-- Action bar & searches -->
                     <div class="action-bar" style="display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin-bottom:1.5rem;">
-                        <div style="flex-grow:1; max-width:400px; position:relative;">
-                            <input type="text" id="staffSearchInput" class="form-control"
-                                   placeholder="Search staff instantly..."
+                        <form action="${pageContext.request.contextPath}/admin/staff" method="get" style="flex-grow:1; max-width:400px; position:relative; margin:0;">
+                            <input type="hidden" name="action" value="search" />
+                            <input type="hidden" name="size" value="${pageSize != null ? pageSize : 10}" />
+                            <input type="text" name="keyword" value="${keywordVal}" class="form-control"
+                                   placeholder="Search staff and press Enter..."
                                    style="padding-left: 2.5rem; height: 42px;" />
                             <i class="bi bi-search" style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
-                        </div>
+                            <button type="submit" style="display:none;"></button>
+                        </form>
                         <a href="${pageContext.request.contextPath}/admin/staff?action=create"
                            class="btn btn-blue btn-sm"
                            style="height:42px; display:inline-flex; align-items:center;"><i class="bi bi-person-plus-fill" style="margin-right:0.5rem;"></i> Add New Staff</a>
@@ -170,13 +169,14 @@
                     <div id="staffListContainer">
                         <c:choose>
                             <c:when test="${not empty staffList}">
-                                <div class="staff-grid-header" style="display: grid; grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr; padding: var(--space-3) var(--space-6); font-weight: 700; color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--color-dark-border); margin-bottom: var(--space-4);">
+                                <div class="staff-grid-header" style="display: grid; grid-template-columns: 80px 80px 2.5fr 3.5fr 2.5fr 1.5fr 80px; padding: var(--space-3) var(--space-6); font-weight: 700; color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--color-dark-border); margin-bottom: var(--space-4);">
                                     <div>No.</div>
                                     <div>Avatar</div>
                                     <div>Full Name</div>
                                     <div>Email Address</div>
                                     <div>Phone Number</div>
                                     <div style="text-align: right; padding-right: var(--space-4);">Status</div>
+                                    <div style="text-align: center;">Action</div>
                                 </div>
                                 <c:forEach var="staff" items="${staffList}" varStatus="loop">
                                     <div class="staff-row-card"
@@ -209,10 +209,19 @@
                                             <div class="grid-col col-phone"><c:out value="${staff.phoneNumber}" /></div>
 
                                             <!-- Status Badge only (No button) -->
-                                            <div style="text-align: right;">
+                                            <div style="text-align: right; padding-right: var(--space-4);">
                                                 <span class="status-badge ${staff.status == 'Active' ? 'active' : (staff.status == 'Suspended' ? 'suspended' : 'blocked')}">
                                                     <c:out value="${staff.status}" />
                                                 </span>
+                                            </div>
+
+                                            <!-- Action -->
+                                            <div class="grid-col" style="text-align:center;">
+                                                <div style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:rgba(249,115,22,0.1); color:var(--orange); transition:0.2s;"
+                                                     onmouseover="this.style.background='var(--orange)'; this.style.color='white';"
+                                                     onmouseout="this.style.background='rgba(249,115,22,0.1)'; this.style.color='var(--orange)';">
+                                                    <i class="bi bi-eye-fill" style="font-size:1.1rem;"></i>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -229,37 +238,39 @@
                         </c:choose>
                     </div>
 
-                    <div id="noStaffSearchPlaceholder" class="empty-state" style="display:none; padding: 2rem; border: 1px dashed var(--border); border-radius: var(--r-xl); background: var(--white);">
-                        <div class="empty-state-icon" style="color:var(--text-muted);"><i class="bi bi-search"></i></div>
-                        <div class="empty-state-title" style="margin-top:0.5rem; font-weight:600;">No matching staff members</div>
-                        <p class="text-muted text-sm" style="margin-top:0.25rem;">Try searching using different keywords.</p>
-                    </div>
-
-                    <script>
-                        document.getElementById('staffSearchInput').addEventListener('input', function () {
-                            var val = this.value.toLowerCase().trim();
-                            var cards = document.querySelectorAll('.staff-row-card');
-                            var foundCount = 0;
-                            cards.forEach(function (card) {
-                                var name = card.getAttribute('data-name').toLowerCase();
-                                var email = card.getAttribute('data-email').toLowerCase();
-                                var phone = card.getAttribute('data-phone').toLowerCase();
-                                if (name.includes(val) || email.includes(val) || phone.includes(val)) {
-                                    card.style.setProperty('display', 'flex', 'important');
-                                    foundCount++;
-                                } else {
-                                    card.style.setProperty('display', 'none', 'important');
-                                }
-                            });
-
-                            var placeholder = document.getElementById('noStaffSearchPlaceholder');
-                            if (foundCount === 0 && val !== "") {
-                                placeholder.style.display = 'block';
-                            } else {
-                                placeholder.style.display = 'none';
-                            }
-                        });
-                    </script>
+                    <!-- Pagination Controls -->
+                    <c:if test="${totalPages > 0}">
+                        <div class="pagination-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem;">
+                            <div class="page-size-selector">
+                                <form action="${pageContext.request.contextPath}/admin/staff" method="get" style="margin:0; display:flex; align-items:center; gap:0.5rem;">
+                                    <input type="hidden" name="action" value="${not empty keywordVal ? 'search' : 'list'}" />
+                                    <c:if test="${not empty keywordVal}">
+                                        <input type="hidden" name="keyword" value="${keywordVal}" />
+                                    </c:if>
+                                    <span class="text-sm text-muted">Show:</span>
+                                    <select name="size" class="form-control" style="width:70px; height:32px; padding:0 0.5rem;" onchange="this.form.submit()">
+                                        <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                                        <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                        <option value="15" ${pageSize == 15 ? 'selected' : ''}>15</option>
+                                        <option value="30" ${pageSize == 30 ? 'selected' : ''}>30</option>
+                                        <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                    </select>
+                                    <span class="text-sm text-muted">entries</span>
+                                </form>
+                            </div>
+                            <div class="pagination-links" style="display:flex; gap:0.25rem;">
+                                <c:set var="prevPage" value="${currentPage - 1 > 0 ? currentPage - 1 : 1}" />
+                                <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${prevPage}" class="btn btn-sm ${currentPage == 1 ? 'disabled' : ''}" style="border:1px solid var(--border); background:var(--white);">&laquo; Prev</a>
+                                
+                                <c:forEach begin="1" end="${totalPages}" var="p">
+                                    <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${p}" class="btn btn-sm" style="${p == currentPage ? 'background:var(--orange); color:white; border-color:var(--orange);' : 'border:1px solid var(--border); background:var(--white);'}">${p}</a>
+                                </c:forEach>
+                                
+                                <c:set var="nextPage" value="${currentPage + 1 <= totalPages ? currentPage + 1 : totalPages}" />
+                                <a href="?action=${not empty keywordVal ? 'search' : 'list'}&keyword=${keywordVal}&size=${pageSize}&page=${nextPage}" class="btn btn-sm ${currentPage == totalPages ? 'disabled' : ''}" style="border:1px solid var(--border); background:var(--white);">Next &raquo;</a>
+                            </div>
+                        </div>
+                    </c:if>
 
                 </div>
             </main>

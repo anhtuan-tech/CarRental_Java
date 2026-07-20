@@ -330,6 +330,10 @@ public class CarDAO {
      * Soft-deleted cars ('Deleted') are filtered out (BR37, BR47, BR48).
      */
     public List<Car> getCarsByOwner(int ownerId) {
+        return getCarsByOwner(ownerId, 0, 1000000);
+    }
+
+    public List<Car> getCarsByOwner(int ownerId, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Car> list = new ArrayList<>();
@@ -340,9 +344,10 @@ public class CarDAO {
                 + "LEFT JOIN CarType ct ON c.type_id = ct.type_id "
                 + "LEFT JOIN CarImage ci ON c.car_id = ci.car_id AND ci.is_primary = 1 "
                 + "WHERE c.owner_id = ? AND c.status <> 'Deleted' "
-                + "ORDER BY c.car_id DESC";
+                + "ORDER BY c.car_id DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, offset, limit});
             while (rs != null && rs.next()) {
                 list.add(mapRowToCar(rs));
             }
@@ -354,10 +359,28 @@ public class CarDAO {
         return list;
     }
 
+    public int countCarsByOwner(int ownerId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM Car c WHERE c.owner_id = ? AND c.status <> 'Deleted'";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countCarsByOwner failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
+    }
+
     /**
      * Search cars within the logged-in owner's fleet only (BR39).
      */
-    public List<Car> searchCars(int ownerId, String keyword) {
+    public List<Car> searchCars(int ownerId, String keyword, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Car> list = new ArrayList<>();
@@ -369,10 +392,11 @@ public class CarDAO {
                 + "LEFT JOIN CarImage ci ON c.car_id = ci.car_id AND ci.is_primary = 1 "
                 + "WHERE c.owner_id = ? AND c.status <> 'Deleted' "
                 + "AND (c.car_name LIKE ? OR c.brand LIKE ? OR c.license_plate LIKE ?) "
-                + "ORDER BY c.car_id DESC";
+                + "ORDER BY c.car_id DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + keyword.trim() + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[]{ownerId, wrap, wrap, wrap});
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, wrap, wrap, wrap, offset, limit});
             while (rs != null && rs.next()) {
                 list.add(mapRowToCar(rs));
             }
@@ -382,6 +406,27 @@ public class CarDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countSearchCars(int ownerId, String keyword) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM Car c "
+                + "WHERE c.owner_id = ? AND c.status <> 'Deleted' "
+                + "AND (c.car_name LIKE ? OR c.brand LIKE ? OR c.license_plate LIKE ?)";
+        String wrap = "%" + keyword.trim() + "%";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, wrap, wrap, wrap});
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countSearchCars (owner) failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
     /**
@@ -633,6 +678,10 @@ public class CarDAO {
      * Retrieve all cars across the platform regardless of status (UC-19.1).
      */
     public List<Car> getAllCars() {
+        return getAllCars(0, 1000000);
+    }
+
+    public List<Car> getAllCars(int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Car> list = new ArrayList<>();
@@ -644,9 +693,10 @@ public class CarDAO {
                 + "LEFT JOIN CarImage ci ON c.car_id = ci.car_id AND ci.is_primary = 1 "
                 + "LEFT JOIN Profile p ON c.owner_id = p.user_id "
                 + "WHERE c.status <> 'Deleted' "
-                + "ORDER BY c.car_id DESC";
+                + "ORDER BY c.car_id DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query);
+            rs = db.executeSelectQuery(query, new Object[]{offset, limit});
             while (rs != null && rs.next()) {
                 Car car = mapRowToCar(rs);
                 car.setOwnerName(rs.getString("owner_name"));
@@ -658,6 +708,24 @@ public class CarDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countAllCars() {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM Car c WHERE c.status <> 'Deleted'";
+        try {
+            rs = db.executeSelectQuery(query);
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countAllCars failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
     /**
@@ -702,7 +770,7 @@ public class CarDAO {
     /**
      * Search cars across the master database space (UC-19.4).
      */
-    public List<Car> searchByKeyword(String keyword) {
+    public List<Car> searchByKeyword(String keyword, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<Car> list = new ArrayList<>();
@@ -715,21 +783,44 @@ public class CarDAO {
                 + "LEFT JOIN Profile p ON c.owner_id = p.user_id "
                 + "WHERE c.status <> 'Deleted' "
                 + "AND (c.car_name LIKE ? OR c.brand LIKE ? OR c.license_plate LIKE ? OR c.status LIKE ? OR p.full_name LIKE ?) "
-                + "ORDER BY c.car_id DESC";
+                + "ORDER BY c.car_id DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + keyword.trim() + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[]{wrap, wrap, wrap, wrap, wrap});
+            rs = db.executeSelectQuery(query, new Object[]{wrap, wrap, wrap, wrap, wrap, offset, limit});
             while (rs != null && rs.next()) {
                 Car car = mapRowToCar(rs);
                 car.setOwnerName(rs.getString("owner_name"));
                 list.add(car);
             }
         } catch (SQLException ex) {
-            logger.log(Level.SEVERE, "searchByKeyword (car) failed", ex);
+            logger.log(Level.SEVERE, "searchByKeyword failed", ex);
         } finally {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int countSearchByKeyword(String keyword) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        int count = 0;
+        String query = "SELECT COUNT(*) AS cnt FROM Car c "
+                + "LEFT JOIN Profile p ON c.owner_id = p.user_id "
+                + "WHERE c.status <> 'Deleted' "
+                + "AND (c.car_name LIKE ? OR c.brand LIKE ? OR c.license_plate LIKE ? OR c.status LIKE ? OR p.full_name LIKE ?)";
+        String wrap = "%" + keyword.trim() + "%";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{wrap, wrap, wrap, wrap, wrap});
+            if (rs != null && rs.next()) {
+                count = rs.getInt("cnt");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "countSearchByKeyword failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return count;
     }
 
     private Car mapRowToCar(ResultSet rs) throws SQLException {

@@ -49,6 +49,7 @@ public class DashboardController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
             }
+            populateAdminDashboard(request);
             request.getRequestDispatcher("/WEB-INF/views/admin/adminDashboard.jsp").forward(request, response);
 
         } else if ("/staff/dashboard".equals(path)) {
@@ -57,6 +58,7 @@ public class DashboardController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
             }
+            populateStaffDashboard(request);
             request.getRequestDispatcher("/WEB-INF/views/staff/staffDashboard.jsp").forward(request, response);
 
         } else if ("/owner/dashboard".equals(path)) {
@@ -71,6 +73,99 @@ public class DashboardController extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/home");
         }
+    }
+
+    /**
+     * Query all data needed by adminDashboard.jsp and set as request attributes.
+     */
+    private void populateAdminDashboard(HttpServletRequest request) {
+        dao.UserDAO userDAO = new dao.UserDAO();
+        CarDAO carDAO = new CarDAO();
+        BookingDAO bookingDAO = new BookingDAO();
+
+        long totalUsers = userDAO.getAllUsersByRole(2).size() + userDAO.getAllUsersByRole(3).size() + userDAO.getAllUsersByRole(4).size();
+        long staffAccounts = userDAO.getAllStaffs().size();
+        long totalVehicles = carDAO.getAllCars().size();
+
+        List<Booking> allBookings = bookingDAO.getAllCarBookings();
+        BigDecimal platformRevenue = BigDecimal.ZERO;
+        
+        int[] bookingsByMonth = new int[12];
+        for (Booking b : allBookings) {
+            if (b.getCreatedAt() != null) {
+                int month = b.getCreatedAt().getMonthValue() - 1;
+                if (month >= 0 && month <= 11) {
+                    bookingsByMonth[month]++;
+                }
+            }
+            if ("Completed".equalsIgnoreCase(b.getStatus()) && b.getSubtotalFee() != null && b.getOwnerPayout() != null) {
+                platformRevenue = platformRevenue.add(b.getSubtotalFee().subtract(b.getOwnerPayout()));
+            }
+        }
+
+        request.setAttribute("totalUsers", totalUsers);
+        request.setAttribute("staffAccounts", staffAccounts);
+        request.setAttribute("totalVehicles", totalVehicles);
+        request.setAttribute("platformRevenue", platformRevenue);
+
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < 12; i++) {
+            sb.append(bookingsByMonth[i]);
+            if (i < 11) sb.append(",");
+        }
+        sb.append("]");
+        request.setAttribute("monthlyBookingsJson", sb.toString());
+    }
+
+    /**
+     * Query all data needed by staffDashboard.jsp and set as request attributes.
+     */
+    private void populateStaffDashboard(HttpServletRequest request) {
+        CarDAO     carDAO     = new CarDAO();
+        BookingDAO bookingDAO = new BookingDAO();
+
+        List<Car> allCars = carDAO.getAllCars();
+        List<Booking> allBookings = bookingDAO.getAllCarBookings();
+
+        long pendingBookings = allBookings.stream()
+                .filter(b -> "Pending".equalsIgnoreCase(b.getStatus()))
+                .count();
+
+        long activeRentals = allBookings.stream()
+                .filter(b -> "Active".equalsIgnoreCase(b.getStatus()))
+                .count();
+
+        long carsToReview = allCars.stream()
+                .filter(c -> "Pending_Approval".equalsIgnoreCase(c.getStatus()))
+                .count();
+
+        long completedBookings = allBookings.stream()
+                .filter(b -> "Completed".equalsIgnoreCase(b.getStatus()))
+                .count();
+
+        request.setAttribute("pendingBookings", pendingBookings);
+        request.setAttribute("activeRentals", activeRentals);
+        request.setAttribute("carsToReview", carsToReview);
+        request.setAttribute("completedBookings", completedBookings);
+
+        // Chart data: Bookings per month (current year logic simplified to all time per month)
+        int[] bookingsByMonth = new int[12];
+        for (Booking b : allBookings) {
+            if (b.getCreatedAt() != null) {
+                int month = b.getCreatedAt().getMonthValue() - 1;
+                if (month >= 0 && month <= 11) {
+                    bookingsByMonth[month]++;
+                }
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < 12; i++) {
+            sb.append(bookingsByMonth[i]);
+            if (i < 11) sb.append(",");
+        }
+        sb.append("]");
+        request.setAttribute("monthlyBookingsJson", sb.toString());
     }
 
     /**

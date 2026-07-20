@@ -39,14 +39,41 @@ public class EarningController extends HttpServlet {
 
         EarningDAO earningDAO = new EarningDAO();
         
+        // Pagination params
+        int page = 1;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null) {
+            try {
+                page = Integer.parseInt(pageParam);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException ignored) {}
+        }
+        int size = 5;
+        String sizeParam = request.getParameter("size");
+        if (sizeParam != null) {
+            try {
+                size = Integer.parseInt(sizeParam);
+                if (size < 1) size = 5;
+            } catch (NumberFormatException ignored) {}
+        }
+        
         // 1. Get Earnings Summary (Completed payout sum)
         BigDecimal totalEarnings = earningDAO.getEarningsSummary(user.getUserId());
         
         // 2. Get Audit Timeline booking log history
-        List<BookingHistory> bookingHistory = earningDAO.getBookingHistory(user.getUserId());
+        int totalHistory = earningDAO.getBookingHistoryCount(user.getUserId());
+        int totalPages = (int) Math.ceil((double) totalHistory / size);
+        if (totalPages < 1) totalPages = 1;
+        if (page > totalPages) page = totalPages;
+        
+        int offset = (page - 1) * size;
+        List<BookingHistory> bookingHistory = earningDAO.getBookingHistory(user.getUserId(), offset, size);
 
         request.setAttribute("totalEarnings", totalEarnings);
         request.setAttribute("bookingHistory", bookingHistory);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", size);
+        request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/views/owner/earning.jsp").forward(request, response);
     }

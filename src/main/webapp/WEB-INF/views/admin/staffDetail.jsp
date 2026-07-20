@@ -81,10 +81,6 @@
                     <div class="mgmt-menu-section-title">Finance</div>
                     <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/admin/revenue"><i class="bi bi-bar-chart-line-fill"></i> Revenue Report</a></li>
                 </ul>
-                <div class="mgmt-sidebar-footer">
-                    <div class="mgmt-user-info"><i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/></div>
-                    <a href="${pageContext.request.contextPath}/logout" style="display:block; margin-top:0.5rem; font-size:0.8rem; color:#EF4444; text-decoration:none;"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                </div>
             </aside>
             <!-- Main Content -->
             <main class="mgmt-content">

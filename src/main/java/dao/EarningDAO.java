@@ -47,6 +47,10 @@ public class EarningDAO {
      * Fetch timeline booking history log trail for an owner's fleet (UC-17 step 10).
      */
     public List<BookingHistory> getBookingHistory(int ownerId) {
+        return getBookingHistory(ownerId, 0, 100000);
+    }
+
+    public List<BookingHistory> getBookingHistory(int ownerId, int offset, int limit) {
         DBContext db = new DBContext();
         ResultSet rs = null;
         List<BookingHistory> list = new ArrayList<>();
@@ -56,9 +60,10 @@ public class EarningDAO {
                 + "JOIN Booking b ON bh.booking_id = b.booking_id "
                 + "JOIN Car c ON b.car_id = c.car_id "
                 + "WHERE c.owner_id = ? "
-                + "ORDER BY bh.changed_at DESC";
+                + "ORDER BY bh.changed_at DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, offset, limit});
             while (rs != null && rs.next()) {
                 BookingHistory bh = new BookingHistory();
                 bh.setHistoryId(rs.getInt("history_id"));
@@ -82,5 +87,26 @@ public class EarningDAO {
             db.closeResources(rs);
         }
         return list;
+    }
+
+    public int getBookingHistoryCount(int ownerId) {
+        DBContext db = new DBContext();
+        ResultSet rs = null;
+        String query = "SELECT COUNT(*) AS total_rows "
+                + "FROM BookingHistory bh "
+                + "JOIN Booking b ON bh.booking_id = b.booking_id "
+                + "JOIN Car c ON b.car_id = c.car_id "
+                + "WHERE c.owner_id = ?";
+        try {
+            rs = db.executeSelectQuery(query, new Object[]{ownerId});
+            if (rs != null && rs.next()) {
+                return rs.getInt("total_rows");
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "getBookingHistoryCount failed", ex);
+        } finally {
+            db.closeResources(rs);
+        }
+        return 0;
     }
 }
