@@ -22,9 +22,8 @@ public class BookingDAO {
     private static final Logger logger = Logger.getLogger(BookingDAO.class.getName());
 
     /**
-     * UC-13.1: View My Car Bookings.
-     * Fetches booking records belonging exclusively to a specific customer (BR15 &
-     * BR16).
+     * UC-13.1: View My Car Bookings. Fetches booking records belonging
+     * exclusively to a specific customer (BR15 & BR16).
      *
      * @param customerId Primary key of current logged-in customer
      * @return List of Booking objects
@@ -46,7 +45,7 @@ public class BookingDAO {
                 + "WHERE b.customer_id = ? "
                 + "ORDER BY b.created_at DESC";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { customerId });
+            rs = db.executeSelectQuery(query, new Object[]{customerId});
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -60,13 +59,15 @@ public class BookingDAO {
     }
 
     /**
-     * UC-13.2 Step 1 & BR20: Check vehicle availability for reservation date range.
-     * Rejects execution if targeted car has overlapping active/approved bookings.
+     * UC-13.2 Step 1 & BR20: Check vehicle availability for reservation date
+     * range. Rejects execution if targeted car has overlapping active/approved
+     * bookings.
      *
-     * @param carId     Target vehicle ID
+     * @param carId Target vehicle ID
      * @param startDate Pick-up start date
-     * @param endDate   Drop-off end date
-     * @return true if vehicle is available, false if overlapping conflict occurs
+     * @param endDate Drop-off end date
+     * @return true if vehicle is available, false if overlapping conflict
+     * occurs
      */
     public boolean checkAvailability(int carId, LocalDateTime startDate, LocalDateTime endDate) {
         DBContext db = new DBContext();
@@ -78,7 +79,7 @@ public class BookingDAO {
         try {
             Timestamp startTs = Timestamp.valueOf(startDate);
             Timestamp endTs = Timestamp.valueOf(endDate);
-            rs = db.executeSelectQuery(query, new Object[] { carId, startTs, endTs });
+            rs = db.executeSelectQuery(query, new Object[]{carId, startTs, endTs});
             if (rs != null && rs.next()) {
                 int conflictCount = rs.getInt("conflict_count");
                 return conflictCount == 0;
@@ -102,16 +103,16 @@ public class BookingDAO {
         Timestamp startTs = Timestamp.valueOf(booking.getStartDate());
         Timestamp endTs = Timestamp.valueOf(booking.getEndDate());
 
-        Object[] params = new Object[] {
-                booking.getCustomerId(),
-                booking.getCarId(),
-                startTs,
-                endTs,
-                booking.getTotalDays(),
-                booking.getSubtotalFee(),
-                booking.getPlatformCommission(),
-                booking.getOwnerPayout(),
-                booking.getStatus() != null ? booking.getStatus() : "Pending Payment"
+        Object[] params = new Object[]{
+            booking.getCustomerId(),
+            booking.getCarId(),
+            startTs,
+            endTs,
+            booking.getTotalDays(),
+            booking.getSubtotalFee(),
+            booking.getPlatformCommission(),
+            booking.getOwnerPayout(),
+            booking.getStatus() != null ? booking.getStatus() : "Pending Payment"
         };
 
         try {
@@ -131,13 +132,14 @@ public class BookingDAO {
      * UC-13.2 & UC-13.3: Update booking status.
      *
      * @param bookingId Target booking ID
-     * @param newStatus New status string ('Paid', 'Cancelled', 'Refunded', etc.)
+     * @param newStatus New status string ('Paid', 'Cancelled', 'Refunded',
+     * etc.)
      * @return true if update succeeded
      */
     public boolean updateStatus(int bookingId, String newStatus) {
         DBContext db = new DBContext();
         String query = "UPDATE Booking SET status = ? WHERE booking_id = ?";
-        int affected = db.executeQuery(query, new Object[] { newStatus, bookingId });
+        int affected = db.executeQuery(query, new Object[]{newStatus, bookingId});
         return affected > 0;
     }
 
@@ -160,7 +162,7 @@ public class BookingDAO {
                 + "LEFT JOIN Profile op ON c.owner_id = op.user_id "
                 + "WHERE b.booking_id = ?";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { bookingId });
+            rs = db.executeSelectQuery(query, new Object[]{bookingId});
             if (rs != null && rs.next()) {
                 return mapResultSetToBooking(rs);
             }
@@ -176,7 +178,7 @@ public class BookingDAO {
      * UC-13.4: Search My Car Bookings by keyword.
      *
      * @param customerId Current logged-in customer ID
-     * @param keyword    Search input string
+     * @param keyword Search input string
      * @return List of matching Booking objects
      */
     public List<Booking> searchMyBookings(int customerId, String keyword) {
@@ -196,7 +198,7 @@ public class BookingDAO {
                 + "ORDER BY b.created_at DESC";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { customerId, wrap, wrap, wrap, wrap, wrap });
+            rs = db.executeSelectQuery(query, new Object[]{customerId, wrap, wrap, wrap, wrap, wrap});
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -232,7 +234,7 @@ public class BookingDAO {
                 + "ORDER BY b.created_at DESC "
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { ownerId, offset, limit });
+            rs = db.executeSelectQuery(query, new Object[]{ownerId, offset, limit});
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -252,7 +254,7 @@ public class BookingDAO {
                 + "JOIN Car c ON b.car_id = c.car_id "
                 + "WHERE c.owner_id = ? AND c.status <> 'Deleted'";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { ownerId });
+            rs = db.executeSelectQuery(query, new Object[]{ownerId});
             if (rs != null && rs.next()) {
                 return rs.getInt("total");
             }
@@ -286,7 +288,7 @@ public class BookingDAO {
                 + "ORDER BY b.created_at DESC "
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { offset, limit });
+            rs = db.executeSelectQuery(query, new Object[]{offset, limit});
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -337,7 +339,7 @@ public class BookingDAO {
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, wrap, wrap, offset, limit });
+            rs = db.executeSelectQuery(query, new Object[]{wrap, wrap, wrap, wrap, wrap, offset, limit});
             while (rs != null && rs.next()) {
                 Booking booking = mapResultSetToBooking(rs);
                 list.add(booking);
@@ -359,7 +361,7 @@ public class BookingDAO {
                 + "WHERE p.full_name LIKE ? OR p.phone LIKE ? OR c.car_name LIKE ? OR c.brand LIKE ? OR b.status LIKE ?";
         String wrap = "%" + (keyword != null ? keyword.trim() : "") + "%";
         try {
-            rs = db.executeSelectQuery(query, new Object[] { wrap, wrap, wrap, wrap, wrap });
+            rs = db.executeSelectQuery(query, new Object[]{wrap, wrap, wrap, wrap, wrap});
             if (rs != null && rs.next()) {
                 return rs.getInt("total");
             }
@@ -374,16 +376,16 @@ public class BookingDAO {
     public boolean updateStatus(String status, int bookingId, int actorId, String oldStatus, String note) {
         DBContext db = new DBContext();
         String queryUpdate = "UPDATE Booking SET status = ? WHERE booking_id = ?";
-        int affected = db.executeQuery(queryUpdate, new Object[] { status, bookingId });
+        int affected = db.executeQuery(queryUpdate, new Object[]{status, bookingId});
         if (affected > 0) {
             String queryHistory = "INSERT INTO BookingHistory (booking_id, changed_by, old_status, new_status, note, changed_at) "
                     + "VALUES (?, ?, ?, ?, ?, GETDATE())";
-            db.executeQuery(queryHistory, new Object[] {
-                    bookingId,
-                    actorId,
-                    oldStatus,
-                    status,
-                    note != null ? note : "Status updated."
+            db.executeQuery(queryHistory, new Object[]{
+                bookingId,
+                actorId,
+                oldStatus,
+                status,
+                note != null ? note : "Status updated."
             });
             return true;
         }
@@ -400,12 +402,14 @@ public class BookingDAO {
         booking.setCarId(rs.getInt("car_id"));
 
         Timestamp start = rs.getTimestamp("start_date");
-        if (start != null)
+        if (start != null) {
             booking.setStartDate(start.toLocalDateTime());
+        }
 
         Timestamp end = rs.getTimestamp("end_date");
-        if (end != null)
+        if (end != null) {
             booking.setEndDate(end.toLocalDateTime());
+        }
 
         booking.setTotalDays(rs.getInt("total_days"));
         booking.setSubtotalFee(rs.getBigDecimal("subtotal_fee"));
@@ -414,8 +418,9 @@ public class BookingDAO {
         booking.setStatus(rs.getString("status"));
 
         Timestamp created = rs.getTimestamp("created_at");
-        if (created != null)
+        if (created != null) {
             booking.setCreatedAt(created.toLocalDateTime());
+        }
 
         booking.setCarName(rs.getString("car_name"));
         booking.setBrand(rs.getString("brand"));
@@ -426,7 +431,8 @@ public class BookingDAO {
         booking.setOwnerName(rs.getString("owner_name"));
         try {
             booking.setReviewed(rs.getInt("is_reviewed") == 1);
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+        }
         return booking;
     }
 }

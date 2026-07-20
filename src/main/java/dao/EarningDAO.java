@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Data Access Object for Owner Earnings analytics (UC-17).
+ * Data Access Object for Owner Earnings analytic (UC-17).
  */
 public class EarningDAO {
 
@@ -44,7 +44,8 @@ public class EarningDAO {
     }
 
     /**
-     * Fetch timeline booking history log trail for an owner's fleet (UC-17 step 10).
+     * Fetch timeline booking history log trail for an owner's fleet (UC-17 step
+     * 10).
      */
     public List<BookingHistory> getBookingHistory(int ownerId) {
         return getBookingHistory(ownerId, 0, 100000);
@@ -77,7 +78,9 @@ public class EarningDAO {
                 bh.setNote("[" + carContext + "] " + (note != null ? note : ""));
 
                 Timestamp ts = rs.getTimestamp("changed_at");
-                if (ts != null) bh.setChangedAt(ts.toLocalDateTime());
+                if (ts != null) {
+                    bh.setChangedAt(ts.toLocalDateTime());
+                }
 
                 list.add(bh);
             }

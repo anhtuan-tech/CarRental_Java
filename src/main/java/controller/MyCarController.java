@@ -16,10 +16,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Controller servlet for Owner Car operations (UC-15.1 to UC-15.6).
- * Scoped to Owner role (role_id = 3).
+ * Controller servlet for Owner Car operations (UC-15.1 to UC-15.6). Scoped to
+ * Owner role (role_id = 3).
  */
-@WebServlet(name = "MyCarController", urlPatterns = { "/owner/cars" })
+@WebServlet(name = "MyCarController", urlPatterns = {"/owner/cars"})
 public class MyCarController extends HttpServlet {
 
     @Override
@@ -112,7 +112,8 @@ public class MyCarController extends HttpServlet {
                 if (carIdStr != null && !carIdStr.trim().isEmpty()) {
                     carId = Integer.parseInt(carIdStr.trim());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             User user = (User) request.getSession().getAttribute("user");
             int ownerId = user != null ? user.getUserId() : 0;
@@ -142,10 +143,15 @@ public class MyCarController extends HttpServlet {
         int page = 1;
         int size = 10;
         try {
-            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
-            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
-        } catch (NumberFormatException ignored) {}
-        
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
+            }
+            if (request.getParameter("size") != null) {
+                size = Integer.parseInt(request.getParameter("size"));
+            }
+        } catch (NumberFormatException ignored) {
+        }
+
         int offset = (page - 1) * size;
 
         CarDAO carDAO = new CarDAO();
@@ -185,10 +191,15 @@ public class MyCarController extends HttpServlet {
         int page = 1;
         int size = 10;
         try {
-            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
-            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
-        } catch (NumberFormatException ignored) {}
-        
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
+            }
+            if (request.getParameter("size") != null) {
+                size = Integer.parseInt(request.getParameter("size"));
+            }
+        } catch (NumberFormatException ignored) {
+        }
+
         int offset = (page - 1) * size;
 
         CarDAO carDAO = new CarDAO();
@@ -203,13 +214,13 @@ public class MyCarController extends HttpServlet {
         } else {
             request.setAttribute("carList", carList);
         }
-        
+
         request.setAttribute("keywordVal", keyword);
         request.setAttribute("currentPage", page);
         request.setAttribute("pageSize", size);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalRecords", totalRecords);
-        
+
         request.getRequestDispatcher("/WEB-INF/views/owner/carList.jsp").forward(request, response);
     }
 
@@ -258,7 +269,7 @@ public class MyCarController extends HttpServlet {
         CarDAO carDAO = new CarDAO();
         // BR41: unique plate rule
         if (carDAO.checkDuplicateLicense(licensePlate)) {
-            request.setAttribute("errorMsg", "License plate is already registered to another active vehicle.");
+            request.setAttribute("errorMsg", "License plate is already registered to another active car.");
             prefillRegisterForm(request, carName, brand, model, licensePlate, priceStr, typeIdStr, documentUrl,
                     specsJson, primaryImageUrl);
             showRegisterForm(request, response);
@@ -307,7 +318,7 @@ public class MyCarController extends HttpServlet {
 
         // BR43: Owners can strictly view specs details of their own vehicles
         if (!carDAO.checkOwner(carId, user.getUserId())) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Access denied. You do not own this vehicle.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Access denied. You do not own this car.");
             response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
             return;
         }
@@ -449,10 +460,10 @@ public class MyCarController extends HttpServlet {
         boolean success = carDAO.removeCar(carId); // BR47, BR48 Soft Delete status update
 
         if (success) {
-            request.getSession(true).setAttribute("toastSuccessMsg", "Vehicle removed successfully.");
+            request.getSession(true).setAttribute("toastSuccessMsg", "Car removed successfully.");
             response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
         } else {
-            request.getSession(true).setAttribute("toastErrorMsg", "Failed to remove vehicle.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Failed to remove car.");
             response.sendRedirect(request.getContextPath() + "/owner/cars?action=detail&id=" + carId);
         }
     }
@@ -460,10 +471,10 @@ public class MyCarController extends HttpServlet {
     // Validation rules (BR40, BR44)
     private String validateCarDetails(String carName, String brand, String model, String licensePlate, BigDecimal price,
             String documentUrl) {
-        if (carName == null || carName.trim().isEmpty() ||
-                brand == null || brand.trim().isEmpty() ||
-                model == null || model.trim().isEmpty() ||
-                licensePlate == null || licensePlate.trim().isEmpty()) {
+        if (carName == null || carName.trim().isEmpty()
+                || brand == null || brand.trim().isEmpty()
+                || model == null || model.trim().isEmpty()
+                || licensePlate == null || licensePlate.trim().isEmpty()) {
             return "Name, Brand, Model, and License Plate are mandatory.";
         }
         // BR40 – document url (no longer mandatory as per user request)

@@ -14,19 +14,17 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- * Handles Owner login (role_id = 3).
- * GET → ownerLogin.jsp | POST → checkLogin(role_id=3) → ownerDashboard
+ * Handles Owner login (role_id = 3). GET → ownerLogin.jsp | POST →
+ * checkLogin(role_id=3) → ownerDashboard
  *
- * Business Rules enforced:
- *   BR49 – email format, no blank password
- *   BR50 – Active only
- *   BR51 – brute-force lock (handled in UserDAO)
+ * Business Rules enforced: BR49 – email format, no blank password BR50 – Active
+ * only BR51 – brute-force lock (handled in UserDAO)
  */
 @WebServlet(name = "LoginOwnerController", urlPatterns = {"/login/owner"})
 public class LoginOwnerController extends HttpServlet {
 
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    private static final Pattern EMAIL_PATTERN
+            = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,7 +43,7 @@ public class LoginOwnerController extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String email    = request.getParameter("email");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         String validationError = validateInput(email, password);
@@ -60,7 +58,7 @@ public class LoginOwnerController extends HttpServlet {
         User user = userDAO.checkLogin(email, password, 4); // role_id = 4 (Owner)
 
         if (user == null) {
-            request.setAttribute("errorMsg", "Incorrect email or password, or the account is locked/inactive.");
+            request.setAttribute("errorMsg", "Incorrect email or password, or the account is locked.");
             request.setAttribute("email", email);
             request.getRequestDispatcher("/WEB-INF/views/auth/ownerLogin.jsp").forward(request, response);
             return;
@@ -73,9 +71,15 @@ public class LoginOwnerController extends HttpServlet {
     }
 
     private String validateInput(String email, String password) {
-        if (email == null || email.trim().isEmpty()) return "Email is required.";
-        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) return "Invalid email format.";
-        if (password == null || password.trim().isEmpty()) return "Password is required.";
+        if (email == null || email.trim().isEmpty()) {
+            return "Email is required.";
+        }
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            return "Invalid email format.";
+        }
+        if (password == null || password.trim().isEmpty()) {
+            return "Password is required.";
+        }
         return null;
     }
 }

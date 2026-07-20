@@ -32,10 +32,10 @@ import java.util.logging.Logger;
  * and Back-office Staff/Admin booking management (UC-18.1 to UC-18.4).
  */
 @WebServlet(name = "CarBookingController", urlPatterns = {
-        "/customer/bookings",
-        "/customer/booking",
-        "/customer/vnpay-callback",
-        "/staff/bookings"
+    "/customer/bookings",
+    "/customer/booking",
+    "/customer/vnpay-callback",
+    "/staff/bookings"
 })
 public class CarBookingController extends HttpServlet {
 
@@ -165,8 +165,9 @@ public class CarBookingController extends HttpServlet {
             throws ServletException, IOException {
 
         String keyword = request.getParameter("keyword");
-        if (keyword == null)
+        if (keyword == null) {
             keyword = "";
+        }
 
         List<Booking> matchingBookings = bookingDAO.searchMyBookings(user.getUserId(), keyword);
 
@@ -201,7 +202,7 @@ public class CarBookingController extends HttpServlet {
                 return;
             }
         }
-        
+
         response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
     }
 
@@ -219,7 +220,7 @@ public class CarBookingController extends HttpServlet {
         try {
             carId = Integer.parseInt(carIdStr);
         } catch (Exception e) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Mã xe không hợp lệ.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Invalid car code.");
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -230,7 +231,7 @@ public class CarBookingController extends HttpServlet {
         // BR5 & BR18 & BR19: Date validation check
         if (!validateBookingDate(startDate, endDate)) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Cấu hình ngày thuê xe không hợp lệ. Ngày nhận xe phải từ hôm nay và ngày trả xe phải sau ngày nhận.");
+                    "The car pickup date must be from today onwards, and the return date must be after the pickup date.");
             response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
             return;
         }
@@ -238,8 +239,8 @@ public class CarBookingController extends HttpServlet {
         // BR20: Check vehicle availability
         boolean isAvailable = bookingDAO.checkAvailability(carId, startDate, endDate);
         if (!isAvailable) {
-            request.setAttribute("message", "Xe không sẵn sàng");
-            request.getSession(true).setAttribute("toastErrorMsg", "Xe không sẵn sàng trong khoảng thời gian đã chọn.");
+            request.setAttribute("message", "Car not ready");
+            request.getSession(true).setAttribute("toastErrorMsg", "The car is not available during the selected time.");
             response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
             return;
         }
@@ -247,7 +248,7 @@ public class CarBookingController extends HttpServlet {
         // Fetch Car detail & Calculate Total Amount (BR3)
         Car car = carDAO.getCarById(carId);
         if (car == null) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Không tìm thấy thông tin xe.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Car information not found.");
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -296,7 +297,7 @@ public class CarBookingController extends HttpServlet {
 
         if (!validateBookingDate(startDate, endDate) || !bookingDAO.checkAvailability(carId, startDate, endDate)) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Xe không sẵn sàng hoặc thông tin ngày không hợp lệ.");
+                    "Car not ready or invalid date information.");
             response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
             return;
         }
@@ -330,7 +331,7 @@ public class CarBookingController extends HttpServlet {
                     request.getContextPath());
             response.sendRedirect(paymentUrl);
         } else {
-            request.getSession(true).setAttribute("toastErrorMsg", "Khởi tạo đơn hàng thất bại.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Order creation failed.");
             response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
         }
     }
@@ -346,7 +347,7 @@ public class CarBookingController extends HttpServlet {
 
         if (bookingId <= 0) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Thanh toán thất bại: Không tìm thấy thông tin đơn hàng.");
+                    "Payment failed, order information not found.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
@@ -354,8 +355,9 @@ public class CarBookingController extends HttpServlet {
         Booking booking = bookingDAO.getBookingById(bookingId);
 
         String txnRef = request.getParameter("vnp_TransactionNo");
-        if (txnRef == null || txnRef.isEmpty())
+        if (txnRef == null || txnRef.isEmpty()) {
             txnRef = "VNP" + System.currentTimeMillis();
+        }
 
         if (isVerified && booking != null) {
             // BR21: 100% Online Payment Successful
@@ -369,7 +371,7 @@ public class CarBookingController extends HttpServlet {
             notificationService.sendBookingConfirmation(booking.getCustomerId(), bookingId);
             notificationService.sendBookingToOwner(booking.getOwnerId(), bookingId);
 
-            request.getSession(true).setAttribute("toastSuccessMsg", "Đặt xe & Thanh toán qua VNPay thành công!");
+            request.getSession(true).setAttribute("toastSuccessMsg", "Booking and payment via VNPay successful!");
         } else {
             // Payment Mismatch or Cancelled
             bookingDAO.updateStatus(bookingId, "Cancelled");
@@ -378,7 +380,7 @@ public class CarBookingController extends HttpServlet {
                 Payment paymentRecord = new Payment(bookingId, booking.getSubtotalFee(), "VNPAY", txnRef, "Failed");
                 paymentDAO.insertPayment(paymentRecord);
             }
-            request.getSession(true).setAttribute("toastErrorMsg", "Thanh toán thất bại.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Payment failed.");
         }
 
         response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
@@ -395,7 +397,7 @@ public class CarBookingController extends HttpServlet {
         try {
             bookingId = Integer.parseInt(bookingIdStr);
         } catch (Exception e) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Mã đơn hàng không hợp lệ.");
+            request.getSession(true).setAttribute("toastErrorMsg", "Invalid order number.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
@@ -404,7 +406,7 @@ public class CarBookingController extends HttpServlet {
 
         // BR25 (Booking Ownership Check)
         if (booking == null || booking.getCustomerId() != user.getUserId()) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Bạn không có quyền thực hiện thao tác này.");
+            request.getSession(true).setAttribute("toastErrorMsg", "You do not have permission to perform this action.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
@@ -413,7 +415,7 @@ public class CarBookingController extends HttpServlet {
         if ("Cancelled".equalsIgnoreCase(booking.getStatus()) || "Refunded".equalsIgnoreCase(booking.getStatus())
                 || "Completed".equalsIgnoreCase(booking.getStatus())) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Đơn hàng đã hủy hoặc không thể hoàn tiền.");
+                    "The order has been cancelled or cannot be refunded.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
@@ -432,12 +434,12 @@ public class CarBookingController extends HttpServlet {
                 paymentDAO.updatePaymentStatus(bookingId, "Refunded");
                 notificationService.sendCancelNotification(user.getUserId(), booking.getOwnerId(), bookingId);
 
-                request.getSession(true).setAttribute("toastSuccessMsg", "Hủy thành công! Số tiền đã được hoàn trả.");
+                request.getSession(true).setAttribute("toastSuccessMsg", "Cancellation successful! The amount has been refunded.");
             } else {
                 bookingDAO.updateStatus(bookingId, "Cancelled");
                 bookingHistoryDAO.insertHistory(bookingId, user.getUserId(), "Cancelled", "Cancelled - Refund Failed");
                 request.getSession(true).setAttribute("toastErrorMsg",
-                        "Hủy đơn thành công nhưng gặp sự cố hoàn tiền tự động.");
+                        "Order cancellation successful, but an issue occurred with the automatic refund.");
             }
         } else {
             // Scenario B: Not Eligible for Refund (Cancelled under 1 hour notice or unpaid)
@@ -446,7 +448,7 @@ public class CarBookingController extends HttpServlet {
             notificationService.sendCancelNotification(user.getUserId(), booking.getOwnerId(), bookingId);
 
             request.getSession(true).setAttribute("toastSuccessMsg",
-                    "Hủy thành công! Chuyến đi không đủ điều kiện hoàn tiền.");
+                    "Cancellation successful! The trip is not eligible for a refund.");
         }
 
         response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
@@ -487,9 +489,14 @@ public class CarBookingController extends HttpServlet {
         int page = 1;
         int size = 10;
         try {
-            if (request.getParameter("page") != null) page = Integer.parseInt(request.getParameter("page"));
-            if (request.getParameter("size") != null) size = Integer.parseInt(request.getParameter("size"));
-        } catch (NumberFormatException ignored) {}
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
+            }
+            if (request.getParameter("size") != null) {
+                size = Integer.parseInt(request.getParameter("size"));
+            }
+        } catch (NumberFormatException ignored) {
+        }
 
         int offset = (page - 1) * size;
         int totalRecords = 0;
@@ -497,7 +504,9 @@ public class CarBookingController extends HttpServlet {
 
         if ("search".equalsIgnoreCase(action)) {
             String kw = request.getParameter("keyword");
-            if (kw == null) kw = "";
+            if (kw == null) {
+                kw = "";
+            }
             list = bookingDAO.searchByKeyword(kw, offset, size);
             totalRecords = bookingDAO.countSearchByKeyword(kw);
             request.setAttribute("keywordVal", kw);
@@ -539,7 +548,7 @@ public class CarBookingController extends HttpServlet {
                 String note = request.getParameter("note");
 
                 bookingDAO.updateStatus(statusToValidString(newStatus), bookingId, user.getUserId(), "Pending", note);
-                request.getSession(true).setAttribute("toastSuccessMsg", "Cập nhật trạng thái thành công.");
+                request.getSession(true).setAttribute("toastSuccessMsg", "Status updated successfully.");
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Staff status update failed", e);
             }
@@ -551,15 +560,17 @@ public class CarBookingController extends HttpServlet {
     // Helper Methods
     // =========================================================================
     private boolean validateBookingDate(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null)
+        if (startDate == null || endDate == null) {
             return false;
+        }
         LocalDateTime now = LocalDateTime.now().minusMinutes(5); // 5 min buffer for network latency
         return !startDate.isBefore(now) && endDate.isAfter(startDate);
     }
 
     private LocalDateTime parseDateTime(String dtStr) {
-        if (dtStr == null || dtStr.trim().isEmpty())
+        if (dtStr == null || dtStr.trim().isEmpty()) {
             return null;
+        }
         try {
             return LocalDateTime.parse(dtStr.trim(), DATE_TIME_FORMATTER);
         } catch (Exception e) {
