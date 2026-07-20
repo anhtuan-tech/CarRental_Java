@@ -433,7 +433,7 @@ public class MyCarController extends HttpServlet {
         // BR40 – document url (no longer mandatory as per user request)
         // BR44 – price range
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            return "Price per day must be strictly greater than zero (BR44).";
+            return "Price per day must be strictly greater than zero.";
         }
         return null;
     }

@@ -230,7 +230,7 @@ public class CarBookingController extends HttpServlet {
         // BR5 & BR18 & BR19: Date validation check
         if (!validateBookingDate(startDate, endDate)) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Cấu hình ngày thuê xe không hợp lệ (BR5, BR18, BR19). Ngày nhận xe phải từ hôm nay và ngày trả xe phải sau ngày nhận.");
+                    "Cấu hình ngày thuê xe không hợp lệ. Ngày nhận xe phải từ hôm nay và ngày trả xe phải sau ngày nhận.");
             response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
             return;
         }
@@ -404,7 +404,7 @@ public class CarBookingController extends HttpServlet {
 
         // BR25 (Booking Ownership Check)
         if (booking == null || booking.getCustomerId() != user.getUserId()) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Bạn không có quyền thực hiện thao tác này (BR25).");
+            request.getSession(true).setAttribute("toastErrorMsg", "Bạn không có quyền thực hiện thao tác này.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
@@ -413,7 +413,7 @@ public class CarBookingController extends HttpServlet {
         if ("Cancelled".equalsIgnoreCase(booking.getStatus()) || "Refunded".equalsIgnoreCase(booking.getStatus())
                 || "Completed".equalsIgnoreCase(booking.getStatus())) {
             request.getSession(true).setAttribute("toastErrorMsg",
-                    "Đơn hàng đã hủy hoặc không thể hoàn tiền (BR26, BR30).");
+                    "Đơn hàng đã hủy hoặc không thể hoàn tiền.");
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }

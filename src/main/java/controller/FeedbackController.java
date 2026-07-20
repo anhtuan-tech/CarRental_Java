@@ -393,7 +393,7 @@ public class FeedbackController extends HttpServlet {
     // Helper validation
     private String validateFeedbackData(int rating, String comment) {
         if (rating < 1 || rating > 5) {
-            return "Rating must be an integer between 1 and 5 (BR60).";
+            return "Rating must be an integer between 1 and 5.";
         }
         if (comment == null || comment.trim().isEmpty()) {
             return "Feedback comment text cannot be empty.";

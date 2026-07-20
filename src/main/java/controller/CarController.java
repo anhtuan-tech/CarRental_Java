@@ -354,7 +354,7 @@ public class CarController extends HttpServlet {
 
         // BR86: If status is Rejected, a reason note is mandatory
         if ("Rejected".equalsIgnoreCase(targetStatus) && (reason == null || reason.trim().isEmpty())) {
-            request.setAttribute("errorMsg", "Rejection reason is mandatory (BR86).");
+            request.setAttribute("errorMsg", "Rejection reason is mandatory.");
             request.setAttribute("carDetail", car);
             request.getRequestDispatcher("/WEB-INF/views/staff/staffCarDetail.jsp").forward(request, response);
             return;

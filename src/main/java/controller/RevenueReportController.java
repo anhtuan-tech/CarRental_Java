@@ -35,7 +35,7 @@ public class RevenueReportController extends HttpServlet {
 
         User user = (User) session.getAttribute("user");
         if (user.getRoleId() != 1) { // Admin role is 1
-            request.getSession(true).setAttribute("toastErrorMsg", "Access denied. High-privilege Admin credentials required (BR89).");
+            request.getSession(true).setAttribute("toastErrorMsg", "Access denied. High-privilege Admin credentials required.");
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             return;
         }

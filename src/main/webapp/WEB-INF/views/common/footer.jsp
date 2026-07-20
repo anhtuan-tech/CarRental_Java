@@ -9,13 +9,13 @@
                     <i class="bi bi-car-front-fill" style="color:var(--orange);"></i> Car<span style="color:#F97316;">Rental</span>
                 </div>
                 <p style="font-size:0.875rem; color:#6B7280; line-height:1.7;">
-                    Next-generation self-drive and fleet rental platform. Delivering seamless mobility experiences across Vietnam.
+                    Elevate your driving experience. Choose from hundreds of premium models with seamless booking and transparent pricing.
                 </p>
             </div>
             <div>
                 <h5 style="font-size:0.8rem; font-weight:700; color:#111827; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.06em;">Explore</h5>
                 <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem;">
-                    <li><a href="${pageContext.request.contextPath}/cars" style="color:#6B7280; font-size:0.875rem; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Browse Fleet</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cars" style="color:#6B7280; font-size:0.875rem; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Explore Cars</a></li>
                     <li><a href="${pageContext.request.contextPath}/register/owner" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Become a Host</a></li>
                     <li><a href="${pageContext.request.contextPath}/register/customer" style="color:#6B7280; font-size:0.875rem; text-decoration:none;" onmouseover="this.style.color = '#F97316'" onmouseout="this.style.color = '#6B7280'">Sign Up</a></li>
                 </ul>
@@ -30,7 +30,7 @@
             </div>
         </div>
         <div style="border-top:1px solid #E5E7EB; padding-top:1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#9CA3AF;">
-            <span>&copy; 2026 Car Rental Platform. All rights reserved.</span>
+            <span>&copy; 2026 CarRental. All rights reserved.</span>
         </div>
     </div>
 </footer>

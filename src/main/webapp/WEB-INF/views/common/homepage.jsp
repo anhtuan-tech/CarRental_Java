@@ -2,15 +2,15 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description"
-              content="CarRental - Nền tảng thuê xe cao cấp hàng đầu Việt Nam. Khám phá hàng trăm mẫu xe sang trọng." />
-        <title>Car Rental - Luxury Car Rental</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
+              content="CarRental — Discover hundreds of premium vehicles with seamless booking and transparent pricing." />
+        <title>Car Rental — Elevate Your Driving Experience</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.2" />
     </head>
 
     <body>
@@ -19,6 +19,7 @@
 
             <!-- ============================================================ HERO -->
             <section class="hero-section">
+                <p class="hero-eyebrow" style="visibility: hidden;">&#9733; Premium Car Rental</p>
                 <h1 class="hero-title">
                     Elevate Your Driving <span>Experience</span>
                 </h1>
@@ -27,7 +28,7 @@
                 </p>
                 <c:if test="${not empty sessionScope.user}">
                     <div class="hero-actions">
-                        <a href="${pageContext.request.contextPath}/cars" class="btn btn-blue btn-lg">Explore Cars</a>
+                        <a href="${pageContext.request.contextPath}/cars" class="btn btn-blue btn-lg">Browse Our Fleet</a>
                     </div>
                 </c:if>
             </section>
@@ -40,7 +41,7 @@
                         <div class="blue-line"></div>
                     </div>
                     <span class="text-muted text-sm">
-                        Top picks for your perfect journey
+                        Top picks for your perfect journey.
                     </span>
                 </div>
 
@@ -48,7 +49,7 @@
                     <c:when test="${not empty cars}">
                         <div class="cars-grid">
                             <c:forEach var="car" items="${cars}">
-                                <div class="car-card">
+                                <div class="car-card" onclick="window.location.href = '${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}'">
                                     <div class="car-card-image">
                                         <c:choose>
                                             <c:when test="${not empty car.primaryImageUrl}">
@@ -67,9 +68,18 @@
                                         <div class="car-card-name">
                                             <c:out value="${car.carName}" />
                                         </div>
-                                        <div class="car-card-brand">
-                                            <c:out value="${car.brand}" />  
-                                            <c:out value="${car.model}" />
+                                        <div class="car-card-specs">
+                                            <c:choose>
+                                                <c:when test="${not empty car.brand && not empty car.model}">
+                                                    <c:out value="${car.brand}"/> &bull; <c:out value="${car.model}"/>
+                                                </c:when>
+                                                <c:when test="${not empty car.brand}">
+                                                    <c:out value="${car.brand}"/>
+                                                </c:when>
+                                                <c:when test="${not empty car.model}">
+                                                    <c:out value="${car.model}"/>
+                                                </c:when>
+                                            </c:choose>
                                         </div>
                                         <div class="car-card-footer" style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">
                                             <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
@@ -80,10 +90,10 @@
                                                     </span>
                                                     <span class="car-price-label">/ day</span>
                                                 </div>
-                                                <a href="${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}" class="btn btn-outline-blue btn-sm">View Details</a>
+                                                <a href="${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}" class="btn btn-outline-blue btn-sm" onclick="event.stopPropagation()">View Details</a>
                                             </div>
                                             <c:if test="${sessionScope.user != null && sessionScope.user.roleId == 3}">
-                                                <a href="${pageContext.request.contextPath}/customer/booking?carId=${car.carId}" class="btn btn-blue btn-sm" style="width:100%; text-align:center;">Book Now</a>
+                                                <a href="${pageContext.request.contextPath}/customer/booking?carId=${car.carId}" class="btn btn-blue btn-sm" style="width:100%; text-align:center;" onclick="event.stopPropagation()">Book Now</a>
                                             </c:if>
                                         </div>
                                     </div>
@@ -95,16 +105,13 @@
                         <div class="empty-state">
                             <div class="empty-state-icon"><i class="bi bi-car-front-fill"></i></div>
                             <div class="empty-state-title">No cars available right now</div>
-                            <p class="text-muted text-sm" style="margin-top: 0.5rem;">Please check back later.
-                            </p>
+                            <p class="text-muted text-sm" style="margin-top: 0.5rem;">Please check back later.</p>
                         </div>
                     </c:otherwise>
                 </c:choose>
             </section>
 
         </div>
-
-
 
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </body>

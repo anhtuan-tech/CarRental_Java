@@ -106,7 +106,7 @@ public class RentalOrderController extends HttpServlet {
         String currentStatus = booking.getStatus();
         if (!isValidTransition(currentStatus, targetStatus)) {
             request.getSession(true).setAttribute("toastErrorMsg", 
-                    "Invalid state transition from '" + currentStatus + "' to '" + targetStatus + "' (BR29, BR55).");
+                    "Invalid state transition from '" + currentStatus + "' to '" + targetStatus + "'.");
             response.sendRedirect(request.getContextPath() + "/owner/orders");
             return;
         }
