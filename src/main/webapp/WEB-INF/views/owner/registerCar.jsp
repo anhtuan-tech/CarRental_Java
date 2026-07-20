@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -69,27 +70,7 @@
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
         <div class="mgmt-wrapper">
-            <!-- Sidebar -->
-            <aside class="mgmt-sidebar">
-                <div class="mgmt-sidebar-header">
-                    <div class="mgmt-sidebar-title"><i class="bi bi-key-fill"></i> Owner Hub</div>
-                    <div class="mgmt-sidebar-subtitle">Fleet Management</div>
-                </div>
-                <ul class="mgmt-menu">
-                    <div class="mgmt-menu-section-title">Overview</div>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <div class="mgmt-menu-section-title">My Fleet</div>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/cars"><i class="bi bi-car-front-fill"></i> My Vehicles</a></li>
-                    <div class="mgmt-menu-section-title">Business</div>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/orders"><i class="bi bi-receipt-cutoff"></i> Rental Orders</a></li>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/feedbacks"><i class="bi bi-star-fill"></i> Customer Reviews</a></li>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/owner/earning"><i class="bi bi-wallet2"></i> Earnings &amp; Payouts</a></li>
-                </ul>
-                <div class="mgmt-sidebar-footer">
-                    <div class="mgmt-user-info"><i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.email}"/></div>
-                    <a href="${pageContext.request.contextPath}/logout" style="display:block; margin-top:0.5rem; font-size:0.8rem; color:#EF4444; text-decoration:none;"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                </div>
-            </aside>
+            <jsp:include page="/WEB-INF/views/owner/ownerSidebar.jsp"/>
 
             <!-- Main Content -->
             <main class="mgmt-content">

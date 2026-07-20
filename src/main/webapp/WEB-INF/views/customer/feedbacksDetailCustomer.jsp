@@ -45,13 +45,6 @@
         <div class="page-wrapper">
             <div class="container">
 
-                <!-- Breadcrumbs -->
-                <div class="mb-4">
-                    <a href="${pageContext.request.contextPath}/feedback?action=list"
-                       style="color:var(--color-gray-light); font-size:0.9rem; font-weight:500;">← Back to
-                        My Feedback</a>
-                </div>
-
                 <div class="feedback-detail-card">
 
                     <div class="mb-4">
@@ -106,8 +99,6 @@
                            class="btn btn-blue">
                             Edit Review
                         </a>
-                        <a href="${pageContext.request.contextPath}/feedback?action=list"
-                           class="btn btn-ghost">Back to List</a>
                     </div>
 
                 </div>

@@ -49,13 +49,6 @@
         <div class="page-wrapper">
             <div class="container">
 
-                <!-- Breadcrumbs -->
-                <div class="mb-4">
-                    <a href="${pageContext.request.contextPath}/feedback?action=detail&id=${feedback.feedbackId}"
-                       style="color:var(--color-gray-light); font-size:0.9rem; font-weight:500;">← Back to
-                        Details</a>
-                </div>
-
                 <div class="feedback-form-card">
 
                     <div class="mb-4">

@@ -164,7 +164,7 @@
                             <!-- Empty state informational message -->
                             <div class="empty-state">
                                 <div class="empty-state-icon">💬</div>
-                                <div class="empty-state-title">You have not submitted any feedbacks yet
+                                <div class="empty-state-title">You have not submitted any feedback yet
                                 </div>
                                 <p class="text-muted text-sm" style="margin-top: 0.5rem;">Rent a car from
                                     our fleet first and complete a transaction to review.</p>
@@ -200,29 +200,7 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
-        <footer class="site-footer" style="margin-top:var(--space-16);">
-            <div class="footer-inner">
-                <div>
-                    <div class="footer-brand">Car<span>Rental</span></div>
-                    <p class="footer-desc">Premium car rental platform - connecting vehicle owners and
-                        customers safely and transparently.</p>
-                </div>
-                <div class="footer-col">
-                    <div class="footer-col-title">For Users</div>
-                    <a href="${pageContext.request.contextPath}/login/customer">Customers</a>
-                    <a href="${pageContext.request.contextPath}/login/owner">Owners</a>
-                </div>
-                <div class="footer-col">
-                    <div class="footer-col-title">Support</div>
-                    <a href="#">Terms of Use</a>
-                    <a href="#">Privacy Policy</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <span>© 2026 CarRental. All rights reserved.</span>
-            </div>
-        </footer>
+
 
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
         <script>
