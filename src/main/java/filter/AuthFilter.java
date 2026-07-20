@@ -92,8 +92,8 @@ public class AuthFilter implements Filter {
             }
         }
 
-        // 4. Customer-Restricted Area Check (e.g. /customer/bookings)
-        else if (path.startsWith("/customer/")) {
+        // 4. Customer-Restricted Area Check (e.g. /customer/bookings, /feedback)
+        else if (path.startsWith("/customer/") || path.startsWith("/feedback")) {
             if (user == null) {
                 httpResponse.sendRedirect(contextPath + "/login/customer");
                 return;

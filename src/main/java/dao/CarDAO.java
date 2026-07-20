@@ -650,7 +650,9 @@ public class CarDAO {
     public boolean checkActiveBooking(int carId) {
         DBContext db = new DBContext();
         ResultSet rs = null;
-        String query = "SELECT COUNT(*) AS cnt FROM Booking WHERE car_id = ? AND status IN ('Approved', 'Pending', 'Active') AND end_date >= GETDATE()";
+        String query = "SELECT COUNT(*) AS cnt FROM Booking WHERE car_id = ? "
+                + "AND status IN ('Pending Payment', 'Paid', 'Pending', 'Approved', 'Confirmed', 'Active') "
+                + "AND end_date >= GETDATE()";
         try {
             rs = db.executeSelectQuery(query, new Object[]{carId});
             if (rs != null && rs.next()) {
