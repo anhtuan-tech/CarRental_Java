@@ -37,7 +37,7 @@ public class PaymentService {
             // Đơn vị tiền tệ VNPAY tính bằng xu (VND * 100)
             long amountInCents = amount.multiply(new BigDecimal(100)).longValue();
 
-            String vnp_TxnRef = String.valueOf(bookingId);
+            String vnp_TxnRef = bookingId + "T" + System.currentTimeMillis();
             String vnp_ReturnUrl = "http://localhost:8080" + contextPath + "/customer/vnpay-callback";
 
             Map<String, String> vnp_Params = new TreeMap<>();
@@ -169,7 +169,11 @@ public class PaymentService {
         String[] txnRefArr = parameterMap.get("vnp_TxnRef");
         if (txnRefArr != null && txnRefArr.length > 0) {
             try {
-                return Integer.parseInt(txnRefArr[0].trim());
+                String rawTxnRef = txnRefArr[0].trim();
+                if (rawTxnRef.contains("T")) {
+                    rawTxnRef = rawTxnRef.split("T")[0];
+                }
+                return Integer.parseInt(rawTxnRef);
             } catch (NumberFormatException e) {
                 logger.log(Level.WARNING, "Failed to parse bookingId from vnp_TxnRef", e);
             }
