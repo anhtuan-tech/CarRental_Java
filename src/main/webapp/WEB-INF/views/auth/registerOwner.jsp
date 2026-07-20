@@ -10,7 +10,8 @@
               content="Register an Owner account on CarRental to start earning from your vehicle fleet." />
         <title>Owner Registration - Car Rental</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

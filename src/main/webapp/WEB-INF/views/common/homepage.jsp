@@ -11,7 +11,8 @@
                     content="CarRental — Discover hundreds of premium vehicles with seamless booking and transparent pricing." />
                 <title>Car Rental — Elevate Your Driving Experience</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.2" />
-            </head>
+                <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
             <body>
                 <jsp:include page="/WEB-INF/views/common/header.jsp" />

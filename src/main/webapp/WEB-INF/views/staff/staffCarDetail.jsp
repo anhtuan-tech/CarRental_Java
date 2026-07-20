@@ -74,6 +74,7 @@
             margin-top: var(--space-4);
         }
     </style>
+    <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
 </head>
 <body>
 

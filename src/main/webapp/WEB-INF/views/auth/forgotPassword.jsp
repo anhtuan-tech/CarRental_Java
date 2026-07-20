@@ -9,7 +9,8 @@
         <meta name="description" content="Forgot Password - Reset your CarRental account password." />
         <title>Forgot Password - Car Rental</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

@@ -93,7 +93,8 @@
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             }
         </style>
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

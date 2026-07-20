@@ -8,7 +8,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Reset Password - Car Rental</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2026.1" />
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

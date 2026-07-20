@@ -115,7 +115,8 @@
                 filter: brightness(1.1);
             }
         </style>
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

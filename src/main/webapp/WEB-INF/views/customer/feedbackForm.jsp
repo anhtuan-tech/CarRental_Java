@@ -37,7 +37,8 @@
                 transform: scale(1.15);
             }
         </style>
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
     <body>
 
         <jsp:include page="/WEB-INF/views/common/header.jsp" />

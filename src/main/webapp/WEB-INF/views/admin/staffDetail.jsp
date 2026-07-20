@@ -59,7 +59,8 @@
                 border: 1px solid rgba(239, 68, 68, 0.2);
             }
         </style>
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

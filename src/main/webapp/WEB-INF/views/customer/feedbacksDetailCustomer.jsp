@@ -36,7 +36,8 @@
                 margin-bottom: var(--space-4);
             }
         </style>
-    </head>
+        <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
     <body>
 

@@ -125,7 +125,8 @@
                             border: 1px solid rgba(239, 68, 68, 0.3);
                         }
                     </style>
-                </head>
+                    <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
+</head>
 
                 <body>
                     <jsp:include page="/WEB-INF/views/common/header.jsp" />
