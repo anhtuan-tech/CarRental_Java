@@ -119,22 +119,9 @@
                 <jsp:include page="/WEB-INF/views/common/header.jsp" />
                 <div class="mgmt-wrapper">
                     <!-- Sidebar -->
-                    <aside class="mgmt-sidebar">
-                        <div class="mgmt-sidebar-header">
-                            <div class="mgmt-sidebar-title"><i class="bi bi-clipboard2-check-fill"></i> Staff Desk</div>
-                            <div class="mgmt-sidebar-subtitle">Operations Panel</div>
-                        </div>
-                        <ul class="mgmt-menu">
-                            <div class="mgmt-menu-section-title">Overview</div>
-                            <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/staff/dashboard"><i
-                                        class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <div class="mgmt-menu-section-title">Operations</div>
-                            <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/staff/bookings"><i
-                                        class="bi bi-calendar2-check-fill"></i> Manage Bookings</a></li>
-                            <li class="mgmt-menu-item active"><a href="${pageContext.request.contextPath}/staff/cars"><i
-                                        class="bi bi-car-front-fill"></i> Manage Cars</a></li>
-                        </ul>
-            </aside>
+                    <jsp:include page="/WEB-INF/views/common/staffSidebar.jsp">
+                        <jsp:param name="activeMenu" value="cars" />
+                    </jsp:include>
 
                     <!-- Main Content -->
                     <main class="mgmt-content">

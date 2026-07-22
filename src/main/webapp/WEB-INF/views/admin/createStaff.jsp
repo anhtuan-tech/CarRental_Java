@@ -27,21 +27,9 @@
 
         <div class="mgmt-wrapper">
             <!-- Admin Sidebar -->
-            <aside class="mgmt-sidebar">
-                <div class="mgmt-sidebar-header">
-                    <div class="mgmt-sidebar-title"><i class="bi bi-shield-fill"></i> Admin Portal</div>
-                    <div class="mgmt-sidebar-subtitle">System Control Panel</div>
-                </div>
-                <ul class="mgmt-menu">
-                    <div class="mgmt-menu-section-title">Overview</div>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <div class="mgmt-menu-section-title">Management</div>
-                    <li class="mgmt-menu-item active"><a href="${pageContext.request.contextPath}/admin/staff"><i class="bi bi-people-fill"></i> Manage Staff</a></li>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/admin/users"><i class="bi bi-person-lines-fill"></i> Manage Users</a></li>
-                    <div class="mgmt-menu-section-title">Finance</div>
-                    <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/admin/revenue"><i class="bi bi-bar-chart-line-fill"></i> Revenue Report</a></li>
-                </ul>
-            </aside>
+            <jsp:include page="/WEB-INF/views/common/adminSidebar.jsp">
+                <jsp:param name="activeMenu" value="staff" />
+            </jsp:include>
             <!-- Main Content -->
             <main class="mgmt-content">
                 <div class="admin-container">

@@ -16,7 +16,7 @@
 %>
 <aside class="mgmt-sidebar">
     <div class="mgmt-sidebar-header">
-        <div class="mgmt-sidebar-title"><i class="bi bi-key-fill"></i> Car Owner Portal</div>
+        <div class="mgmt-sidebar-title"><i class="bi bi-key-fill"></i> Owner Dashboard</div>
     </div>
 
     <ul class="mgmt-menu">

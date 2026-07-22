@@ -73,6 +73,11 @@
             display: none;
             margin-top: var(--space-4);
         }
+        .admin-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 var(--space-4);
+        }
     </style>
     <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
 </head>
@@ -80,8 +85,15 @@
 
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
-<div class="page-wrapper">
-    <div class="container">
+<div class="mgmt-wrapper">
+    <!-- Sidebar -->
+    <jsp:include page="/WEB-INF/views/common/staffSidebar.jsp">
+        <jsp:param name="activeMenu" value="cars" />
+    </jsp:include>
+
+    <!-- Main Content -->
+    <main class="mgmt-content">
+        <div class="admin-container">
 
 
 
@@ -192,7 +204,8 @@
             </c:otherwise>
         </c:choose>
 
-    </div>
+        </div>
+    </main>
 </div>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp" />
