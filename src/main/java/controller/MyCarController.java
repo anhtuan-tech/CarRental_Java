@@ -452,8 +452,8 @@ public class MyCarController extends HttpServlet {
 
         // BR46 – Block deletion if active bookings exist
         if (carDAO.checkActiveBooking(carId)) {
-            request.getSession(true).setAttribute("toastErrorMsg", "Cannot remove: Active structural bookings exist.");
-            response.sendRedirect(request.getContextPath() + "/owner/cars?action=detail&id=" + carId);
+            request.getSession(true).setAttribute("toastErrorMsg", "Cannot delete car because it has active booking schedules.");
+            response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
             return;
         }
 
@@ -464,7 +464,7 @@ public class MyCarController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
         } else {
             request.getSession(true).setAttribute("toastErrorMsg", "Failed to remove car.");
-            response.sendRedirect(request.getContextPath() + "/owner/cars?action=detail&id=" + carId);
+            response.sendRedirect(request.getContextPath() + "/owner/cars?action=list");
         }
     }
 

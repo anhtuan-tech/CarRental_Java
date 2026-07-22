@@ -35,12 +35,6 @@
                             padding: var(--space-4) var(--space-6);
                             margin-bottom: var(--space-4);
                             transition: all 0.2s ease;
-                            cursor: pointer;
-                        }
-
-                        .booking-row-card:hover {
-                            border-color: rgba(249, 115, 22, 0.4);
-                            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
                         }
 
                         .grid-col {
@@ -119,32 +113,17 @@
                             border: 1px solid rgba(107, 114, 128, 0.2);
                         }
                     </style>
-                    <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png" type="image/png" />
-</head>
+                    <link rel="icon" href="${pageContext.request.contextPath}/uploads/favicon/favicorental.png"
+                        type="image/png" />
+                </head>
 
                 <body>
                     <jsp:include page="/WEB-INF/views/common/header.jsp" />
                     <div class="mgmt-wrapper">
                         <!-- Sidebar -->
-                        <aside class="mgmt-sidebar">
-                            <div class="mgmt-sidebar-header">
-                                <div class="mgmt-sidebar-title"><i class="bi bi-clipboard2-check-fill"></i> Staff Desk
-                                </div>
-                                <div class="mgmt-sidebar-subtitle">Operations Panel</div>
-                            </div>
-                            <ul class="mgmt-menu">
-                                <div class="mgmt-menu-section-title">Overview</div>
-                                <li class="mgmt-menu-item"><a
-                                        href="${pageContext.request.contextPath}/staff/dashboard"><i
-                                            class="bi bi-speedometer2"></i> Dashboard</a></li>
-                                <div class="mgmt-menu-section-title">Operations</div>
-                                <li class="mgmt-menu-item active"><a
-                                        href="${pageContext.request.contextPath}/staff/bookings"><i
-                                            class="bi bi-calendar2-check-fill"></i> Manage Bookings</a></li>
-                                <li class="mgmt-menu-item"><a href="${pageContext.request.contextPath}/staff/cars"><i
-                                            class="bi bi-car-front-fill"></i> Manage Cars</a></li>
-                            </ul>
-                        </aside>
+                        <jsp:include page="/WEB-INF/views/common/staffSidebar.jsp">
+                            <jsp:param name="activeMenu" value="bookings" />
+                        </jsp:include>
 
                         <!-- Main Content -->
                         <main class="mgmt-content">
@@ -199,8 +178,7 @@
                                                 <fmt:parseDate value="${item.endDate}" pattern="yyyy-MM-dd'T'HH:mm"
                                                     var="eDate" type="both" />
                                             </c:catch>
-                                            <a href="${pageContext.request.contextPath}/staff/bookings?action=detail&id=${item.bookingId}"
-                                                class="booking-row-card" data-status="<c:out value='${item.status}'/>"
+                                            <div class="booking-row-card" data-status="<c:out value='${item.status}'/>"
                                                 data-customer="<c:out value='${item.customerName}'/>"
                                                 data-owner="<c:out value='${item.ownerName}'/>"
                                                 data-car="<c:out value='${item.brand} ${item.carName}'/>">
@@ -280,7 +258,7 @@
                                                     </div>
 
                                                 </div>
-                                            </a>
+                                            </div>
                                         </c:forEach>
 
                                     </c:when>

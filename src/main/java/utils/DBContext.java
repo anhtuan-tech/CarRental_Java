@@ -18,7 +18,7 @@ public class DBContext {
 
     private final String DB_URL = "jdbc:sqlserver://127.0.0.1:1433;databaseName=car_rental_db;encrypt=false";
     private final String DB_USER = "sa";
-    private final String DB_PWD = "123456";
+    private final String DB_PWD = "12345";
 
     private Connection conn;
     private PreparedStatement statement;

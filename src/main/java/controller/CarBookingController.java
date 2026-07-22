@@ -474,17 +474,6 @@ public class CarBookingController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if ("detail".equalsIgnoreCase(action)) {
-            try {
-                int id = Integer.parseInt(request.getParameter("bookingId"));
-                Booking booking = bookingDAO.getBookingById(id);
-                request.setAttribute("carBookingDetail", booking);
-                request.getRequestDispatcher("/WEB-INF/views/staff/carBookingDetail.jsp").forward(request, response);
-            } catch (Exception e) {
-                response.sendRedirect(request.getContextPath() + "/staff/bookings?action=list");
-            }
-            return;
-        }
 
         int page = 1;
         int size = 10;
