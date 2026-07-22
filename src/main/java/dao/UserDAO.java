@@ -60,45 +60,77 @@ public class UserDAO {
     }
 
     public boolean insertAccount(User user) {
-        DBContext dbUser = new DBContext();
-        DBContext dbProfile = new DBContext();
-        ResultSet rs = null;
-
         String insertUser = "INSERT INTO [User] (role_id, email, password, phone_number, status, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, 'Active', GETDATE(), GETDATE())";
-        int affected = dbUser.executeQuery(insertUser,
-                new Object[] { user.getRoleId(), user.getEmail(), user.getPassword(), user.getPhoneNumber() });
-
-        if (affected == 0) {
-            return false;
-        }
-
         String getNewId = "SELECT TOP 1 user_id FROM [User] WHERE email = ? ORDER BY created_at DESC";
-        int newUserId = -1;
-        try {
-            rs = dbUser.executeSelectQuery(getNewId, new Object[] { user.getEmail() });
-            if (rs != null && rs.next()) {
-                newUserId = rs.getInt("user_id");
-            }
-        } catch (SQLException ex) {
-            logger.log(Level.SEVERE, "insertAccount – get user_id failed", ex);
-            return false;
-        } finally {
-            dbUser.closeResources(rs);
-        }
-
-        if (newUserId == -1) {
-            return false;
-        }
+        String insertProfile = "INSERT INTO [Profile] (user_id, full_name, avatar_url, driver_license_no, id_card_no, address) "
+                + "VALUES (?, ?, ?, NULL, NULL, '')";
 
         String fullNameVal = (user.getFullName() != null) ? user.getFullName().trim() : "";
         String avatarUrlVal = (user.getAvatarUrl() != null) ? user.getAvatarUrl().trim() : "";
-        String insertProfile = "INSERT INTO [Profile] (user_id, full_name, avatar_url, driver_license_no, id_card_no, address) "
-                + "VALUES (?, ?, ?, '', '', '')";
-        int profileAffected = dbProfile.executeQuery(insertProfile,
-                new Object[] { newUserId, fullNameVal, avatarUrlVal });
 
-        return profileAffected > 0;
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement psUser = null;
+        java.sql.PreparedStatement psGetId = null;
+        java.sql.PreparedStatement psProfile = null;
+        ResultSet rs = null;
+        try {
+            DBContext db = new DBContext();
+            conn = db.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Insert User row
+            psUser = conn.prepareStatement(insertUser);
+            psUser.setObject(1, user.getRoleId());
+            psUser.setObject(2, user.getEmail());
+            psUser.setObject(3, user.getPassword());
+            psUser.setObject(4, user.getPhoneNumber());
+            int affected = psUser.executeUpdate();
+            if (affected == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // 2. Retrieve generated user_id
+            psGetId = conn.prepareStatement(getNewId);
+            psGetId.setObject(1, user.getEmail());
+            rs = psGetId.executeQuery();
+            int newUserId = -1;
+            if (rs.next()) {
+                newUserId = rs.getInt("user_id");
+            }
+            rs.close(); rs = null;
+            if (newUserId == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            // 3. Insert Profile row
+            psProfile = conn.prepareStatement(insertProfile);
+            psProfile.setObject(1, newUserId);
+            psProfile.setObject(2, fullNameVal);
+            psProfile.setObject(3, avatarUrlVal);
+            int profileAffected = psProfile.executeUpdate();
+            if (profileAffected == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, "insertAccount failed", ex);
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ignored) {}
+            }
+            return false;
+        } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException ignored) {}
+            try { if (psUser != null) psUser.close(); } catch (SQLException ignored) {}
+            try { if (psGetId != null) psGetId.close(); } catch (SQLException ignored) {}
+            try { if (psProfile != null) psProfile.close(); } catch (SQLException ignored) {}
+            try { if (conn != null) conn.close(); } catch (SQLException ignored) {}
+        }
     }
 
     public boolean updateAccount(User user) {
